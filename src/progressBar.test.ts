@@ -6,9 +6,16 @@ describe("getProgressBarData", () => {
     vi.useFakeTimers();
   });
 
-  it("should return null for invalid path", () => {
+  it("should return current year data for invalid path", () => {
+    vi.setSystemTime(new Date("2024-06-15"));
     const result = getProgressBarData("/invalid");
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result?.start.getFullYear()).toBe(2024);
+    expect(result?.start.getMonth()).toBe(0); // January
+    expect(result?.start.getDate()).toBe(1);
+    expect(result?.end.getFullYear()).toBe(2024);
+    expect(result?.end.getMonth()).toBe(11); // December
+    expect(result?.title).toBe("2024");
   });
 
   it("should return progress data for valid path", () => {

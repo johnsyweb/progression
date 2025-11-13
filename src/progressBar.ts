@@ -13,10 +13,23 @@ export interface ProgressBarData {
   title: string;
 }
 
-export function getProgressBarData(path: string): ProgressBarData | null {
+export function getProgressBarData(path: string): ProgressBarData {
   const dateRange = parseDateFromPath(path);
+
+  // If no valid date range, default to current year
   if (!dateRange) {
-    return null;
+    const current = new Date();
+    const currentYear = current.getFullYear();
+    const start = new Date(currentYear, 0, 1); // January 1st
+    const end = new Date(currentYear, 11, 31, 23, 59, 59, 999); // December 31st
+
+    return {
+      start,
+      end,
+      current,
+      percentage: calculateProgress(start, end, current),
+      title: currentYear.toString(),
+    };
   }
 
   const current = new Date();

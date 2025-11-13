@@ -19,16 +19,6 @@ function init(): void {
     return;
   }
 
-  if (!data) {
-    container.innerHTML = `
-      <div class="error-message">
-        <p>Invalid date range. Please provide two dates in the URL path.</p>
-        <p>Example: <code>/2024-01-01/2024-12-31</code></p>
-      </div>
-    `;
-    return;
-  }
-
   document.title = `${data.title} | johnsy.com`;
 
   const ogTitleMeta = document.querySelector('meta[property="og:title"]');
