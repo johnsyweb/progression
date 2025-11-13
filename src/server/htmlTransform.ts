@@ -1,7 +1,7 @@
 import type { Plugin } from "vite";
 import { generateProgressBarSVG } from "../utils/svgGenerator";
 
-export function htmlTransformPlugin(): Plugin {
+export function htmlTransformPlugin(basePath: string = "/"): Plugin {
   return {
     name: "html-transform",
     configureServer(server) {
@@ -85,6 +85,15 @@ export function htmlTransformPlugin(): Plugin {
               encodeURIComponent(path === "/" ? "" : path);
 
             let html = responseData.toString("utf-8");
+
+            // Inject base tag if base path is not root
+            if (basePath !== "/" && !html.includes("<base")) {
+              // Normalize: ensure it starts with / and ends with /
+              const normalizedBasePath = `/${basePath.replace(/^\/|\/$/g, "")}/`;
+              const baseTag = `<base href="${normalizedBasePath}" />`;
+              html = html.replace(/<head>/, `<head>\n    ${baseTag}`);
+            }
+
             html = html.replace(
               '<meta property="og:url" content="" />',
               `<meta property="og:url" content="${ogUrl}" />`

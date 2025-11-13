@@ -3,8 +3,40 @@ export interface DateRange {
   end: Date;
 }
 
+export function getBasePath(): string {
+  // Get base path from <base> tag or default to "/"
+  // In Node.js/test environment, document might not exist
+  if (typeof document === "undefined") {
+    return "/";
+  }
+  const baseTag = document.querySelector("base");
+  if (baseTag && baseTag.href) {
+    try {
+      const baseUrl = new URL(baseTag.href);
+      return baseUrl.pathname.endsWith("/")
+        ? baseUrl.pathname.slice(0, -1)
+        : baseUrl.pathname;
+    } catch {
+      return "/";
+    }
+  }
+  return "/";
+}
+
+export function stripBasePath(path: string, basePath: string): string {
+  if (basePath === "/") {
+    return path;
+  }
+  if (path.startsWith(basePath)) {
+    return path.slice(basePath.length) || "/";
+  }
+  return path;
+}
+
 export function parseDateFromPath(path: string): DateRange | null {
-  const parts = path.split("/").filter((part) => part.length > 0);
+  const basePath = getBasePath();
+  const strippedPath = stripBasePath(path, basePath);
+  const parts = strippedPath.split("/").filter((part) => part.length > 0);
 
   if (parts.length < 2) {
     return null;
@@ -27,7 +59,9 @@ export function parseDateFromPath(path: string): DateRange | null {
 }
 
 export function parseTitleFromPath(path: string): string {
-  const parts = path.split("/").filter((part) => part.length > 0);
+  const basePath = getBasePath();
+  const strippedPath = stripBasePath(path, basePath);
+  const parts = strippedPath.split("/").filter((part) => part.length > 0);
 
   if (parts.length >= 3) {
     return decodeURIComponent(parts.slice(2).join("/"));

@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { generateFallbackSVG } from "../utils/generateFallbackSVG";
 
-export function buildPlugin(baseUrl: string): Plugin {
+export function buildPlugin(baseUrl: string, basePath: string): Plugin {
   return {
     name: "build-plugin",
     writeBundle(options) {
@@ -16,8 +16,16 @@ export function buildPlugin(baseUrl: string): Plugin {
           const fallbackSvg = generateFallbackSVG();
           writeFileSync(fallbackSvgPath, fallbackSvg);
 
-          // Update HTML with fallback image URL
+          // Update HTML with fallback image URL and base tag
           let html = readFileSync(htmlPath, "utf-8");
+
+          // Inject base tag if base path is not root
+          if (basePath !== "/") {
+            // Normalize: ensure it starts with / and ends with /
+            const normalizedBasePath = `/${basePath.replace(/^\/|\/$/g, "")}/`;
+            const baseTag = `<base href="${normalizedBasePath}" />`;
+            html = html.replace(/<head>/, `<head>\n    ${baseTag}`);
+          }
 
           // Use fallback image for static hosting (works for crawlers)
           // The service worker will handle dynamic images in browsers

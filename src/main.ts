@@ -1,7 +1,10 @@
 import { getProgressBarData, renderProgressBar } from "./progressBar";
+import { getBasePath } from "./utils/dateParser";
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js").catch(() => {
+  const basePath = getBasePath();
+  const swPath = basePath === "/" ? "/sw.js" : `${basePath}/sw.js`;
+  navigator.serviceWorker.register(swPath).catch(() => {
     // Service worker registration failed, continue without it
   });
 }

@@ -6,6 +6,7 @@ import {
   formatDate,
   formatDateLong,
   parseTitleFromPath,
+  stripBasePath,
 } from "./dateParser";
 
 describe("parseDate", () => {
@@ -165,5 +166,31 @@ describe("parseTitleFromPath", () => {
   it("should handle title with multiple path segments", () => {
     const title = parseTitleFromPath("/2024-01-01/2024-12-31/My/Title/Here");
     expect(title).toBe("My/Title/Here");
+  });
+});
+
+describe("stripBasePath", () => {
+  it("should strip base path from URL path", () => {
+    expect(
+      stripBasePath("/progression/2024-01-01/2024-12-31", "/progression")
+    ).toBe("/2024-01-01/2024-12-31");
+  });
+
+  it("should return path unchanged when base is root", () => {
+    expect(stripBasePath("/2024-01-01/2024-12-31", "/")).toBe(
+      "/2024-01-01/2024-12-31"
+    );
+  });
+
+  it("should handle base path with trailing slash", () => {
+    expect(stripBasePath("/progression/2024-01-01", "/progression")).toBe(
+      "/2024-01-01"
+    );
+  });
+
+  it("should handle path that doesn't start with base path", () => {
+    expect(stripBasePath("/2024-01-01/2024-12-31", "/progression")).toBe(
+      "/2024-01-01/2024-12-31"
+    );
   });
 });

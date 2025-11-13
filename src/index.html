@@ -28,13 +28,31 @@
       (function () {
         const path = window.location.pathname;
         const baseUrl = window.location.origin;
+        const baseTag = document.querySelector("base");
+        let basePath = "/";
+        if (baseTag && baseTag.href) {
+          try {
+            const baseUrlObj = new URL(baseTag.href);
+            basePath = baseUrlObj.pathname.endsWith("/")
+              ? baseUrlObj.pathname.slice(0, -1)
+              : baseUrlObj.pathname;
+          } catch {
+            basePath = "/";
+          }
+        }
         const ogUrl = baseUrl + (path === "/" ? "" : path);
 
         // Try to use dynamic SVG via service worker, fallback to static image
+        const ogImagePath =
+          basePath === "/" ? "/og-image.svg" : `${basePath}/og-image.svg`;
+        const fallbackImagePath =
+          basePath === "/"
+            ? "/og-image-fallback.svg"
+            : `${basePath}/og-image-fallback.svg`;
         const ogImageUrl =
-          path && path !== "/"
-            ? baseUrl + "/og-image.svg?path=" + encodeURIComponent(path)
-            : baseUrl + "/og-image-fallback.svg";
+          path && path !== "/" && path !== basePath
+            ? baseUrl + ogImagePath + "?path=" + encodeURIComponent(path)
+            : baseUrl + fallbackImagePath;
 
         const ogImageMeta = document.querySelector('meta[property="og:image"]');
         if (ogImageMeta) {
