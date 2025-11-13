@@ -25,7 +25,7 @@ export default defineConfig({
       },
       output: {
         entryFileNames: (chunkInfo) => {
-          return chunkInfo.name === "sw" ? "sw.js" : "[name].js";
+          return chunkInfo.name === "sw" ? "sw.js" : "[name]-[hash].js";
         },
       },
     },
