@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="theme-color"
+      content="#fdf6e3"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#002a35"
+      media="(prefers-color-scheme: dark)"
+    />
+    <title>Progress | johnsy.com</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta property="og:title" content="Progress | johnsy.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="" />
+    <script>
+      (function () {
+        const path = window.location.pathname;
+        const baseUrl = window.location.origin;
+        const ogUrl = baseUrl + (path === "/" ? "" : path);
+
+        // Try to use dynamic SVG via service worker, fallback to static image
+        const ogImageUrl =
+          path && path !== "/"
+            ? baseUrl + "/og-image.svg?path=" + encodeURIComponent(path)
+            : baseUrl + "/og-image-fallback.svg";
+
+        const ogImageMeta = document.querySelector('meta[property="og:image"]');
+        if (ogImageMeta) {
+          ogImageMeta.setAttribute("content", ogImageUrl);
+        }
+
+        const ogUrlMeta = document.querySelector('meta[property="og:url"]');
+        if (ogUrlMeta) {
+          ogUrlMeta.setAttribute("content", ogUrl);
+        }
+
+        const twitterImageMeta = document.querySelector(
+          'meta[name="twitter:image"]'
+        );
+        if (twitterImageMeta) {
+          twitterImageMeta.setAttribute("content", ogImageUrl);
+        }
+
+        // Title will be updated by main.ts based on the path
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="page">
+      <header id="header">
+        <h1><a href="https://johnsy.com/">johnsy.com</a></h1>
+      </header>
+
+      <main id="content" role="main">
+        <div id="progress-container"></div>
+      </main>
+
+      <footer id="footer">
+        <p>
+          Copyright &copy; 2000-<span id="current-year"></span>
+          <a rel="author" href="https://johnsy.com/about/"
+            ><em><acronym title="Peter Alexander Johns">paj</acronym></em></a
+          >
+          (<a
+            rel="me"
+            aria-label="@pete.johnsy.com on Bluesky"
+            href="https://bsky.app/profile/pete.johnsy.com"
+            >@pete.johnsy.com</a
+          >) All rights (and some wrongs) reserved.
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/main.ts"></script>
+    <script>
+      document.getElementById("current-year").textContent =
+        new Date().getFullYear();
+    </script>
+  </body>
+</html>
