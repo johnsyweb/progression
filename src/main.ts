@@ -31,7 +31,7 @@ function init(): void {
     const currentYear = current.getFullYear();
     const startDate = `${currentYear}-01-01`;
     const endDate = `${currentYear}-12-31`;
-    const newPath = `${basePath}/${startDate}/${endDate}`;
+    const newPath = `${basePath}/${startDate}/${endDate}/${currentYear}`;
 
     // Update URL without page reload
     window.history.replaceState({}, "", newPath);
