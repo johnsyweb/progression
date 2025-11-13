@@ -16,6 +16,12 @@ export function buildPlugin(baseUrl: string, basePath: string): Plugin {
           const fallbackSvg = generateFallbackSVG();
           writeFileSync(fallbackSvgPath, fallbackSvg);
 
+          // Create static og-image.svg file for GitHub Pages
+          // This ensures direct requests (e.g., from crawlers) get SVG instead of 404.html
+          // The service worker will intercept and override with dynamic content for browsers
+          const ogImageSvgPath = join(options.dir, "og-image.svg");
+          writeFileSync(ogImageSvgPath, fallbackSvg);
+
           // Update HTML with fallback image URL and base tag
           let html = readFileSync(htmlPath, "utf-8");
 
