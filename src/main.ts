@@ -4,6 +4,7 @@ import {
   ProgressBarData,
 } from "./progressBar";
 import { getBasePath, stripBasePath, parseDate } from "./utils/dateParser";
+import { shareProgress } from "./utils/share";
 
 if ("serviceWorker" in navigator) {
   const basePath = getBasePath();
@@ -61,6 +62,25 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   }
 
   container.innerHTML = renderProgressBar(data);
+
+  // Set up share button (only show if sharing is available)
+  const shareButton = container.querySelector(
+    'button[data-share="true"]'
+  ) as HTMLButtonElement;
+  if (shareButton) {
+    // Hide button if neither Web Share API nor clipboard is available
+    if (
+      typeof navigator.share === "undefined" &&
+      (!navigator.clipboard ||
+        typeof navigator.clipboard.writeText !== "function")
+    ) {
+      shareButton.style.display = "none";
+    } else {
+      shareButton.addEventListener("click", async () => {
+        await shareProgress(data, window.location.href);
+      });
+    }
+  }
 }
 
 if (document.readyState === "loading") {

@@ -72,6 +72,11 @@ export function renderProgressBar(data: ProgressBarData): string {
   html += `<div class="progress-date-end">${endFormatted}</div>`;
   html += `</div>`;
 
+  // Always include share button - availability will be checked in JavaScript
+  html += `<div class="progress-share">`;
+  html += `<button class="share-button" data-share="true" aria-label="Share progress">Share</button>`;
+  html += `</div>`;
+
   html += `</div>`;
 
   return html;
