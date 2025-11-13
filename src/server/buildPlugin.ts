@@ -44,6 +44,12 @@ export function buildPlugin(baseUrl: string, basePath: string): Plugin {
           );
 
           writeFileSync(htmlPath, html);
+
+          // Copy index.html to 404.html for GitHub Pages SPA routing
+          // GitHub Pages will serve 404.html for any 404 requests,
+          // allowing client-side routing to work
+          const notFoundHtmlPath = join(options.dir, "404.html");
+          writeFileSync(notFoundHtmlPath, html);
         } catch (error) {
           // File might not exist yet, that's okay
         }
