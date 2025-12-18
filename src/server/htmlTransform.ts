@@ -1,6 +1,8 @@
 import type { Plugin } from "vite";
 import type { IncomingMessage } from "http";
 import { generateProgressBarSVG } from "../utils/svgGenerator";
+import { getProgressBarData } from "../progressBar";
+import { generateStatusText } from "../utils/svgGenerator";
 
 export function htmlTransformPlugin(basePath: string = "/"): Plugin {
   return {
@@ -83,6 +85,15 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
               "/og-image.svg?path=" +
               encodeURIComponent(path === "/" ? "" : path);
 
+            // Strip base path from path for getProgressBarData
+            let dataPath = path;
+            if (basePath !== "/" && path.startsWith(basePath)) {
+              dataPath = path.slice(basePath.length) || "/";
+            }
+            const progressData = getProgressBarData(dataPath);
+            const ogTitle = `${progressData.title} | johnsy.com`;
+            const ogDescription = generateStatusText(progressData);
+
             let html = responseData.toString("utf-8");
 
             // Inject base tag if base path is not root
@@ -94,8 +105,16 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
             }
 
             html = html.replace(
+              '<meta property="og:title" content="Progress | johnsy.com" />',
+              `<meta property="og:title" content="${ogTitle.replace(/"/g, "&quot;")}" />`
+            );
+            html = html.replace(
               '<meta property="og:url" content="" />',
               `<meta property="og:url" content="${ogUrl}" />`
+            );
+            html = html.replace(
+              '<meta property="og:description" content="" />',
+              `<meta property="og:description" content="${ogDescription.replace(/"/g, "&quot;")}" />`
             );
             html = html.replace(
               '<meta property="og:image" content="" />',

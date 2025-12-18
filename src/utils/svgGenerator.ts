@@ -10,12 +10,12 @@ function escapeSvgText(text: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function calculateDaysBetween(start: Date, end: Date): number {
+export function calculateDaysBetween(start: Date, end: Date): number {
   const msPerDay = 1000 * 60 * 60 * 24;
   return Math.round((end.getTime() - start.getTime()) / msPerDay);
 }
 
-function generateStatusText(data: {
+export function generateStatusText(data: {
   percentage: number | null;
   start: Date;
   end: Date;

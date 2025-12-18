@@ -18,6 +18,7 @@
     <meta property="og:title" content="Progress | johnsy.com" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="" />
+    <meta property="og:description" content="" />
     <meta property="og:image" content="" />
     <meta property="og:image:type" content="image/svg+xml" />
     <meta property="og:image:width" content="1200" />
@@ -42,6 +43,21 @@
         }
         const ogUrl = baseUrl + (path === "/" ? "" : path);
 
+        // Extract title from path
+        let title = "Progress";
+        let strippedPath = path;
+        if (basePath !== "/" && path.startsWith(basePath)) {
+          strippedPath = path.slice(basePath.length) || "/";
+        }
+        const parts = strippedPath.split("/").filter((part) => part.length > 0);
+        if (parts.length >= 3) {
+          title = decodeURIComponent(parts.slice(2).join("/"));
+        } else if (parts.length === 2) {
+          // If only dates, use current year as title
+          const currentYear = new Date().getFullYear();
+          title = currentYear.toString();
+        }
+
         // Try to use dynamic SVG via service worker, fallback to static image
         const ogImagePath =
           basePath === "/" ? "/og-image.svg" : `${basePath}/og-image.svg`;
@@ -53,6 +69,11 @@
           path && path !== "/" && path !== basePath
             ? baseUrl + ogImagePath + "?path=" + encodeURIComponent(path)
             : baseUrl + fallbackImagePath;
+
+        const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+        if (ogTitleMeta) {
+          ogTitleMeta.setAttribute("content", `${title} | johnsy.com`);
+        }
 
         const ogImageMeta = document.querySelector('meta[property="og:image"]');
         if (ogImageMeta) {
@@ -71,7 +92,7 @@
           twitterImageMeta.setAttribute("content", ogImageUrl);
         }
 
-        // Title will be updated by main.ts based on the path
+        // Description will be updated by main.ts based on the path
       })();
     </script>
   </head>

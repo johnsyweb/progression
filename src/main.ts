@@ -10,6 +10,7 @@ import {
   formatDate,
 } from "./utils/dateParser";
 import { shareProgress } from "./utils/share";
+import { generateStatusText } from "./utils/svgGenerator";
 
 if ("serviceWorker" in navigator) {
   const basePath = getBasePath();
@@ -52,12 +53,24 @@ function init(): void {
   renderProgressBarToContainer(data);
 }
 
-function renderProgressBarToContainer(data: ProgressBarData): void {
-  const container = document.getElementById("progress-container");
-  if (!container) {
-    console.error("Progress container not found");
-    return;
-  }
+function updateOGTags(data: ProgressBarData, path: string): void {
+  const basePath = getBasePath();
+  const baseUrl = window.location.origin;
+  const ogUrl = baseUrl + (path === "/" ? "" : path);
+
+  // Try to use dynamic SVG via service worker, fallback to static image
+  const ogImagePath =
+    basePath === "/" ? "/og-image.svg" : `${basePath}/og-image.svg`;
+  const fallbackImagePath =
+    basePath === "/"
+      ? "/og-image-fallback.svg"
+      : `${basePath}/og-image-fallback.svg`;
+  const ogImageUrl =
+    path && path !== "/" && path !== basePath
+      ? baseUrl + ogImagePath + "?path=" + encodeURIComponent(path)
+      : baseUrl + fallbackImagePath;
+
+  const statusText = generateStatusText(data);
 
   document.title = `${data.title} | johnsy.com`;
 
@@ -65,6 +78,41 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   if (ogTitleMeta) {
     ogTitleMeta.setAttribute("content", `${data.title} | johnsy.com`);
   }
+
+  const ogUrlMeta = document.querySelector('meta[property="og:url"]');
+  if (ogUrlMeta) {
+    ogUrlMeta.setAttribute("content", ogUrl);
+  }
+
+  const ogImageMeta = document.querySelector('meta[property="og:image"]');
+  if (ogImageMeta) {
+    ogImageMeta.setAttribute("content", ogImageUrl);
+  }
+
+  const ogDescriptionMeta = document.querySelector(
+    'meta[property="og:description"]'
+  );
+  if (ogDescriptionMeta) {
+    ogDescriptionMeta.setAttribute("content", statusText);
+  }
+
+  const twitterImageMeta = document.querySelector(
+    'meta[name="twitter:image"]'
+  );
+  if (twitterImageMeta) {
+    twitterImageMeta.setAttribute("content", ogImageUrl);
+  }
+}
+
+function renderProgressBarToContainer(data: ProgressBarData): void {
+  const container = document.getElementById("progress-container");
+  if (!container) {
+    console.error("Progress container not found");
+    return;
+  }
+
+  const path = window.location.pathname;
+  updateOGTags(data, path);
 
   container.innerHTML = renderProgressBar(data);
 
@@ -144,12 +192,8 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
       window.history.pushState({}, "", newPath);
 
       originalTitle = trimmedTitle;
-      document.title = `${trimmedTitle} | johnsy.com`;
-
-      const ogTitleMeta = document.querySelector('meta[property="og:title"]');
-      if (ogTitleMeta) {
-        ogTitleMeta.setAttribute("content", `${trimmedTitle} | johnsy.com`);
-      }
+      const updatedData = getProgressBarData(newPath);
+      updateOGTags(updatedData, newPath);
     };
 
     const focusTitle = (): void => {
