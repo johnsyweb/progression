@@ -54,7 +54,7 @@ export function renderProgressBar(data: ProgressBarData): string {
   let html = `<div class="progress-container">`;
 
   html += `<div class="progress-title-wrapper">`;
-  html += `<h2 class="progress-title" contenteditable="true" role="textbox" aria-label="Progress title (Alt+E to edit)" tabindex="0" accesskey="e" title="Alt+E to edit">${escapeHtml(data.title)}</h2>`;
+  html += `<h2 class="progress-title" contenteditable="true" role="textbox" aria-label="Progress title (Alt+T to edit)" tabindex="0" accesskey="t" title="Alt+T to edit">${escapeHtml(data.title)}</h2>`;
   html += `</div>`;
 
   html += `<div class="progress-bar-wrapper">`;
@@ -76,7 +76,11 @@ export function renderProgressBar(data: ProgressBarData): string {
   html += `<span class="date-display" tabindex="0" role="button" aria-label="Start date (Alt+S to edit)" title="Alt+S to edit">${startFormatted}</span>`;
   html += `</div>`;
   html += `<div class="progress-date-current">${currentFormatted}</div>`;
-  html += `<div class="progress-date-end">${endFormatted}</div>`;
+  html += `<div class="progress-date-end">`;
+  html += `<label for="end-date-input" class="visually-hidden">End date</label>`;
+  html += `<input type="date" id="end-date-input" class="date-input" value="${formatDate(data.end)}" min="${formatDate(data.current)}" aria-label="End date (Alt+E to edit, must be from today)" data-date-type="end" accesskey="e" />`;
+  html += `<span class="date-display" tabindex="0" role="button" aria-label="End date (Alt+E to edit)" title="Alt+E to edit">${endFormatted}</span>`;
+  html += `</div>`;
   html += `</div>`;
 
   // Always include share button - availability will be checked in JavaScript

@@ -127,13 +127,13 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
       }
     });
 
-    // Handle accesskey (Alt+E or Ctrl+Alt+E depending on platform)
+    // Handle accesskey (Alt+T or Cmd+T depending on platform)
     document.addEventListener("keydown", (e: KeyboardEvent) => {
       if (
         (e.altKey || e.metaKey) &&
         !e.ctrlKey &&
         !e.shiftKey &&
-        (e.key === "e" || e.key === "E")
+        (e.key === "t" || e.key === "T")
       ) {
         // Check if we're not already in an input/textarea/contenteditable
         const activeElement = document.activeElement;
@@ -240,6 +240,98 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
         }
         e.preventDefault();
         showDatePicker();
+      }
+    });
+  }
+
+  // Set up end date editing
+  const endDateInput = container.querySelector(
+    "#end-date-input"
+  ) as HTMLInputElement;
+  const endDateDisplay = container.querySelector(
+    ".progress-date-end .date-display"
+  ) as HTMLElement;
+  if (endDateInput && endDateDisplay) {
+    const updateEndDate = (newEndDateStr: string): void => {
+      const newEndDate = parseDate(newEndDateStr);
+      if (!newEndDate) {
+        return;
+      }
+
+      // Ensure end date is not before start date
+      let finalStartDate = data.start;
+      let finalEndDate = newEndDate;
+      if (newEndDate < data.start) {
+        finalStartDate = newEndDate;
+      }
+
+      const basePath = getBasePath();
+      const startDateStr = formatDate(finalStartDate);
+      const endDateStr = formatDate(finalEndDate);
+      const encodedTitle = encodeURIComponent(data.title);
+      const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
+
+      window.history.pushState({}, "", newPath);
+
+      // Re-render the progress bar with new dates
+      const newData = getProgressBarData(newPath);
+      renderProgressBarToContainer(newData);
+    };
+
+    endDateInput.addEventListener("change", () => {
+      const newDate = endDateInput.value;
+      if (newDate) {
+        updateEndDate(newDate);
+      }
+    });
+
+    const showEndDatePicker = (): void => {
+      endDateInput.style.display = "inline-block";
+      endDateDisplay.style.display = "none";
+      endDateInput.focus();
+      endDateInput.showPicker?.();
+    };
+
+    // Show date input on click, hide display
+    endDateDisplay.addEventListener("click", () => {
+      showEndDatePicker();
+    });
+
+    // Show date picker on Enter key when display is focused
+    endDateDisplay.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showEndDatePicker();
+      }
+    });
+
+    // Hide input and show display when input loses focus
+    endDateInput.addEventListener("blur", () => {
+      endDateInput.style.display = "none";
+      endDateDisplay.style.display = "inline";
+    });
+
+    // Handle accesskey (Alt+E or Cmd+E depending on platform)
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (
+        (e.altKey || e.metaKey) &&
+        !e.ctrlKey &&
+        !e.shiftKey &&
+        (e.key === "e" || e.key === "E")
+      ) {
+        // Check if we're not already in an input/textarea/contenteditable
+        const activeElement = document.activeElement;
+        if (
+          activeElement &&
+          (activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            (activeElement instanceof HTMLElement &&
+              activeElement.isContentEditable))
+        ) {
+          return;
+        }
+        e.preventDefault();
+        showEndDatePicker();
       }
     });
   }
