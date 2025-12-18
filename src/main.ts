@@ -152,6 +152,98 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
     });
   }
 
+  // Set up start date editing
+  const startDateInput = container.querySelector(
+    "#start-date-input"
+  ) as HTMLInputElement;
+  const startDateDisplay = container.querySelector(
+    ".progress-date-start .date-display"
+  ) as HTMLElement;
+  if (startDateInput && startDateDisplay) {
+    const updateStartDate = (newStartDateStr: string): void => {
+      const newStartDate = parseDate(newStartDateStr);
+      if (!newStartDate) {
+        return;
+      }
+
+      // Ensure start date is not after end date
+      let finalStartDate = newStartDate;
+      let finalEndDate = data.end;
+      if (newStartDate > data.end) {
+        finalEndDate = newStartDate;
+      }
+
+      const basePath = getBasePath();
+      const startDateStr = formatDate(finalStartDate);
+      const endDateStr = formatDate(finalEndDate);
+      const encodedTitle = encodeURIComponent(data.title);
+      const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
+
+      window.history.pushState({}, "", newPath);
+
+      // Re-render the progress bar with new dates
+      const newData = getProgressBarData(newPath);
+      renderProgressBarToContainer(newData);
+    };
+
+    startDateInput.addEventListener("change", () => {
+      const newDate = startDateInput.value;
+      if (newDate) {
+        updateStartDate(newDate);
+      }
+    });
+
+    const showDatePicker = (): void => {
+      startDateInput.style.display = "inline-block";
+      startDateDisplay.style.display = "none";
+      startDateInput.focus();
+      startDateInput.showPicker?.();
+    };
+
+    // Show date input on click, hide display
+    startDateDisplay.addEventListener("click", () => {
+      showDatePicker();
+    });
+
+    // Show date picker on Enter key when display is focused
+    startDateDisplay.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showDatePicker();
+      }
+    });
+
+    // Hide input and show display when input loses focus
+    startDateInput.addEventListener("blur", () => {
+      startDateInput.style.display = "none";
+      startDateDisplay.style.display = "inline";
+    });
+
+    // Handle accesskey (Alt+S or Cmd+S depending on platform)
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (
+        (e.altKey || e.metaKey) &&
+        !e.ctrlKey &&
+        !e.shiftKey &&
+        (e.key === "s" || e.key === "S")
+      ) {
+        // Check if we're not already in an input/textarea/contenteditable
+        const activeElement = document.activeElement;
+        if (
+          activeElement &&
+          (activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            (activeElement instanceof HTMLElement &&
+              activeElement.isContentEditable))
+        ) {
+          return;
+        }
+        e.preventDefault();
+        showDatePicker();
+      }
+    });
+  }
+
   // Set up share button (only show if sharing is available)
   const shareButton = container.querySelector(
     'button[data-share="true"]'

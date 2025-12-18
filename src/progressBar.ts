@@ -3,6 +3,7 @@ import {
   calculateProgress,
   formatDateLong,
   parseTitleFromPath,
+  formatDate,
 } from "./utils/dateParser";
 
 export interface ProgressBarData {
@@ -69,7 +70,11 @@ export function renderProgressBar(data: ProgressBarData): string {
   html += `</div>`;
 
   html += `<div class="progress-dates">`;
-  html += `<div class="progress-date-start">${startFormatted}</div>`;
+  html += `<div class="progress-date-start">`;
+  html += `<label for="start-date-input" class="visually-hidden">Start date</label>`;
+  html += `<input type="date" id="start-date-input" class="date-input" value="${formatDate(data.start)}" max="${formatDate(data.current)}" aria-label="Start date (Alt+S to edit, must be in the past)" data-date-type="start" accesskey="s" />`;
+  html += `<span class="date-display" tabindex="0" role="button" aria-label="Start date (Alt+S to edit)" title="Alt+S to edit">${startFormatted}</span>`;
+  html += `</div>`;
   html += `<div class="progress-date-current">${currentFormatted}</div>`;
   html += `<div class="progress-date-end">${endFormatted}</div>`;
   html += `</div>`;
