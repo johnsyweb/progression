@@ -1,4 +1,5 @@
 import type { Plugin } from "vite";
+import type { IncomingMessage } from "http";
 import { generateProgressBarSVG } from "../utils/svgGenerator";
 
 export function htmlTransformPlugin(basePath: string = "/"): Plugin {
@@ -15,16 +16,7 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
         res.setHeader("Cache-Control", "public, max-age=3600");
         res.end(svg);
       });
-      const originalUrlMap = new WeakMap<
-        typeof server.middlewares extends (
-          req: infer R,
-          res: any,
-          next: any
-        ) => any
-          ? R
-          : never,
-        string
-      >();
+      const originalUrlMap = new WeakMap<IncomingMessage, string>();
 
       server.middlewares.use((req, res, next) => {
         if (

@@ -69,13 +69,18 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   container.innerHTML = renderProgressBar(data);
 
   // Set up date picker helper function
+  interface DateInputWithExtras extends HTMLInputElement {
+    __showPicker?: () => void;
+    __accessKey?: string;
+  }
+
   const setupDatePicker = (
     inputId: string,
     displaySelector: string,
     accessKey: string,
     updateDate: (newDateStr: string) => void
   ): void => {
-    const dateInput = container.querySelector(inputId) as HTMLInputElement;
+    const dateInput = container.querySelector(inputId) as DateInputWithExtras;
     const dateDisplay = container.querySelector(displaySelector) as HTMLElement;
     if (!dateInput || !dateDisplay) {
       return;
@@ -112,8 +117,8 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
     });
 
     // Store showPicker function and accesskey on the input element for accesskey handler
-    (dateInput as any).__showPicker = showPicker;
-    (dateInput as any).__accessKey = accessKey.toLowerCase();
+    dateInput.__showPicker = showPicker;
+    dateInput.__accessKey = accessKey.toLowerCase();
   };
 
   // Set up title editing
@@ -207,12 +212,12 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
       return;
     }
 
-    // Ensure start date is not after end date
-    let finalStartDate = newStartDate;
-    let finalEndDate = data.end;
-    if (newStartDate > data.end) {
-      finalEndDate = newStartDate;
-    }
+      // Ensure start date is not after end date
+      const finalStartDate = newStartDate;
+      let finalEndDate = data.end;
+      if (newStartDate > data.end) {
+        finalEndDate = newStartDate;
+      }
 
     const basePath = getBasePath();
     const startDateStr = formatDate(finalStartDate);
@@ -241,12 +246,12 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
       return;
     }
 
-    // Ensure end date is not before start date
-    let finalStartDate = data.start;
-    let finalEndDate = newEndDate;
-    if (newEndDate < data.start) {
-      finalStartDate = newEndDate;
-    }
+      // Ensure end date is not before start date
+      let finalStartDate = data.start;
+      const finalEndDate = newEndDate;
+      if (newEndDate < data.start) {
+        finalStartDate = newEndDate;
+      }
 
     const basePath = getBasePath();
     const startDateStr = formatDate(finalStartDate);
@@ -271,10 +276,10 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   // Set up accesskey handlers for date pickers (single handler for both)
   const startDateInput = container.querySelector(
     "#start-date-input"
-  ) as HTMLInputElement & { __showPicker?: () => void; __accessKey?: string };
+  ) as DateInputWithExtras;
   const endDateInput = container.querySelector(
     "#end-date-input"
-  ) as HTMLInputElement & { __showPicker?: () => void; __accessKey?: string };
+  ) as DateInputWithExtras;
 
   if (startDateInput && endDateInput) {
     const handleDatePickerAccessKey = (e: KeyboardEvent): void => {
@@ -305,11 +310,15 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
     };
 
     // Remove old handler if it exists and add new one
-    const oldHandler = (document as any).__datePickerAccessKeyHandler;
+    interface DocumentWithHandler extends Document {
+      __datePickerAccessKeyHandler?: (e: KeyboardEvent) => void;
+    }
+    const doc = document as DocumentWithHandler;
+    const oldHandler = doc.__datePickerAccessKeyHandler;
     if (oldHandler) {
       document.removeEventListener("keydown", oldHandler);
     }
-    (document as any).__datePickerAccessKeyHandler = handleDatePickerAccessKey;
+    doc.__datePickerAccessKeyHandler = handleDatePickerAccessKey;
     document.addEventListener("keydown", handleDatePickerAccessKey);
   }
 
