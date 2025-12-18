@@ -18,6 +18,20 @@ The site takes two dates from the URL path, with an optional title:
 - An optional third parameter can be used as a custom title (defaults to "Progress")
 - If no valid dates are provided, the site automatically redirects to the current year (e.g., `/progression/2025-01-01/2025-12-31/2025`)
 
+### Editing Features
+
+All elements of the progress bar can be edited directly:
+
+- **Title** - Click the title or press `Alt+T` (or `Cmd+T` on Mac) to edit. Press `Enter` to save or `Escape` to cancel.
+- **Start Date** - Click the start date or press `Alt+S` (or `Cmd+S` on Mac) to open a date picker. The start date is constrained to dates in the past (up to today).
+- **End Date** - Click the end date or press `Alt+E` (or `Cmd+E` on Mac) to open a date picker. The end date is constrained to dates from today onwards.
+
+When dates are changed, the URL is automatically updated and the progress bar is recalculated. If the start date becomes after the end date (or vice versa), the other date is automatically adjusted to maintain a valid range.
+
+### Appearance
+
+The site supports both light and dark modes, automatically adapting to your system preferences. The color palette matches johnsy.com's design system.
+
 ## Development
 
 ```bash
@@ -60,7 +74,8 @@ pnpm run precommit
 - `src/server/htmlTransform.ts` - Vite plugin for HTML transformation during development
 - `src/server/buildPlugin.ts` - Vite plugin for build-time optimisations
 - `src/index.html` - HTML template
-- `src/style.css` - Styles matching johnsy.com
+- `src/style.css` - Styles matching johnsy.com (supports light and dark modes)
+- `src/utils/share.ts` - Share functionality using Web Share API or clipboard fallback
 
 ## Building
 

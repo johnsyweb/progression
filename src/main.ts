@@ -326,15 +326,77 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
     ) {
       shareButton.style.display = "none";
     } else {
-      shareButton.addEventListener("click", async () => {
+      const handleShare = async (): Promise<void> => {
         await shareProgress(data, window.location.href);
+      };
+
+      shareButton.addEventListener("click", handleShare);
+
+      // Handle accesskey (Alt+H or Cmd+H depending on platform)
+      document.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (
+          (e.altKey || e.metaKey) &&
+          !e.ctrlKey &&
+          !e.shiftKey &&
+          (e.key === "h" || e.key === "H")
+        ) {
+          // Check if we're not already in an input/textarea/contenteditable
+          const activeElement = document.activeElement;
+          if (
+            activeElement &&
+            (activeElement.tagName === "INPUT" ||
+              activeElement.tagName === "TEXTAREA" ||
+              (activeElement instanceof HTMLElement &&
+                activeElement.isContentEditable))
+          ) {
+            return;
+          }
+          // Only trigger if share button is visible
+          if (shareButton.style.display !== "none") {
+            e.preventDefault();
+            handleShare();
+          }
+        }
       });
     }
   }
 }
 
+function updateAccessKeysDisplay(): void {
+  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  const modifierKey = isMac ? "⌘" : "Alt";
+  const modifierKeyElements = document.querySelectorAll(".modifier-key");
+
+  modifierKeyElements.forEach((el) => {
+    el.textContent = modifierKey;
+  });
+
+  // Hide share shortcut if share button is not available
+  const shareButton = document.querySelector(
+    'button[data-share="true"]'
+  ) as HTMLButtonElement;
+  const shareAccessKey = document.getElementById("accesskey-share");
+  if (shareButton && shareAccessKey) {
+    const shareListItem = shareAccessKey.closest("li");
+    if (
+      shareButton.style.display === "none" ||
+      (typeof navigator.share === "undefined" &&
+        (!navigator.clipboard ||
+          typeof navigator.clipboard.writeText !== "function"))
+    ) {
+      shareListItem?.setAttribute("style", "display: none;");
+    } else {
+      shareListItem?.removeAttribute("style");
+    }
+  }
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
+    updateAccessKeysDisplay();
+  });
 } else {
   init();
+  updateAccessKeysDisplay();
 }

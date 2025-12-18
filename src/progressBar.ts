@@ -85,7 +85,7 @@ export function renderProgressBar(data: ProgressBarData): string {
 
   // Always include share button - availability will be checked in JavaScript
   html += `<div class="progress-share">`;
-  html += `<button class="share-button" data-share="true" aria-label="Share progress">Share</button>`;
+  html += `<button class="share-button" data-share="true" aria-label="Share progress (Alt+H)" accesskey="h" title="Alt+H to share">Share</button>`;
   html += `</div>`;
 
   html += `</div>`;
