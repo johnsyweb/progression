@@ -52,7 +52,9 @@ export function renderProgressBar(data: ProgressBarData): string {
 
   let html = `<div class="progress-container">`;
 
-  html += `<h2 class="progress-title">${escapeHtml(data.title)}</h2>`;
+  html += `<div class="progress-title-wrapper">`;
+  html += `<h2 class="progress-title" contenteditable="true" role="textbox" aria-label="Progress title (Alt+E to edit)" tabindex="0" accesskey="e" title="Alt+E to edit">${escapeHtml(data.title)}</h2>`;
+  html += `</div>`;
 
   html += `<div class="progress-bar-wrapper">`;
   html += `<div class="progress-bar">`;

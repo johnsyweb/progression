@@ -3,7 +3,12 @@ import {
   renderProgressBar,
   ProgressBarData,
 } from "./progressBar";
-import { getBasePath, stripBasePath, parseDate } from "./utils/dateParser";
+import {
+  getBasePath,
+  stripBasePath,
+  parseDate,
+  formatDate,
+} from "./utils/dateParser";
 import { shareProgress } from "./utils/share";
 
 if ("serviceWorker" in navigator) {
@@ -62,6 +67,90 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   }
 
   container.innerHTML = renderProgressBar(data);
+
+  // Set up title editing
+  const titleElement = container.querySelector(
+    ".progress-title"
+  ) as HTMLElement;
+  if (titleElement) {
+    let originalTitle = data.title;
+
+    const updateTitle = (newTitle: string): void => {
+      const trimmedTitle = newTitle.trim();
+      if (trimmedTitle === "" || trimmedTitle === originalTitle) {
+        titleElement.textContent = originalTitle;
+        return;
+      }
+
+      const basePath = getBasePath();
+      const startDateStr = formatDate(data.start);
+      const endDateStr = formatDate(data.end);
+      const encodedTitle = encodeURIComponent(trimmedTitle);
+      const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
+
+      window.history.pushState({}, "", newPath);
+
+      originalTitle = trimmedTitle;
+      document.title = `${trimmedTitle} | johnsy.com`;
+
+      const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+      if (ogTitleMeta) {
+        ogTitleMeta.setAttribute("content", `${trimmedTitle} | johnsy.com`);
+      }
+    };
+
+    const focusTitle = (): void => {
+      titleElement.focus();
+      const range = document.createRange();
+      range.selectNodeContents(titleElement);
+      range.collapse(false);
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    };
+
+    titleElement.addEventListener("blur", () => {
+      const newTitle = titleElement.textContent || "";
+      updateTitle(newTitle);
+    });
+
+    titleElement.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        titleElement.blur();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        titleElement.textContent = originalTitle;
+        titleElement.blur();
+      }
+    });
+
+    // Handle accesskey (Alt+E or Ctrl+Alt+E depending on platform)
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (
+        (e.altKey || e.metaKey) &&
+        !e.ctrlKey &&
+        !e.shiftKey &&
+        (e.key === "e" || e.key === "E")
+      ) {
+        // Check if we're not already in an input/textarea/contenteditable
+        const activeElement = document.activeElement;
+        if (
+          activeElement &&
+          (activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            (activeElement instanceof HTMLElement &&
+              activeElement.isContentEditable))
+        ) {
+          return;
+        }
+        e.preventDefault();
+        focusTitle();
+      }
+    });
+  }
 
   // Set up share button (only show if sharing is available)
   const shareButton = container.querySelector(
