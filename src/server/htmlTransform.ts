@@ -8,7 +8,14 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
     configureServer(server) {
       server.middlewares.use("/og-image.svg", (req, res) => {
         const url = new URL(req.url || "", `http://${req.headers.host}`);
-        const path = url.searchParams.get("path") || "";
+        let path = url.searchParams.get("path") || "";
+
+        // Strip base path from the path parameter if present
+        // The path parameter might include the base path (e.g., /progression/2025-07-02/...)
+        // but generateProgressBarSVG expects a path relative to the base
+        if (basePath !== "/" && path.startsWith(basePath)) {
+          path = path.slice(basePath.length) || "/";
+        }
 
         const svg = generateProgressBarSVG(path);
 
