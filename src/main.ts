@@ -68,6 +68,54 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
 
   container.innerHTML = renderProgressBar(data);
 
+  // Set up date picker helper function
+  const setupDatePicker = (
+    inputId: string,
+    displaySelector: string,
+    accessKey: string,
+    updateDate: (newDateStr: string) => void
+  ): void => {
+    const dateInput = container.querySelector(inputId) as HTMLInputElement;
+    const dateDisplay = container.querySelector(displaySelector) as HTMLElement;
+    if (!dateInput || !dateDisplay) {
+      return;
+    }
+
+    const showPicker = (): void => {
+      dateInput.style.display = "inline-block";
+      dateDisplay.style.display = "none";
+      dateInput.focus();
+      dateInput.showPicker?.();
+    };
+
+    dateInput.addEventListener("change", () => {
+      const newDate = dateInput.value;
+      if (newDate) {
+        updateDate(newDate);
+      }
+    });
+
+    dateDisplay.addEventListener("click", () => {
+      showPicker();
+    });
+
+    dateDisplay.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showPicker();
+      }
+    });
+
+    dateInput.addEventListener("blur", () => {
+      dateInput.style.display = "none";
+      dateDisplay.style.display = "inline";
+    });
+
+    // Store showPicker function and accesskey on the input element for accesskey handler
+    (dateInput as any).__showPicker = showPicker;
+    (dateInput as any).__accessKey = accessKey.toLowerCase();
+  };
+
   // Set up title editing
   const titleElement = container.querySelector(
     ".progress-title"
@@ -153,173 +201,84 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   }
 
   // Set up start date editing
-  const startDateInput = container.querySelector(
-    "#start-date-input"
-  ) as HTMLInputElement;
-  const startDateDisplay = container.querySelector(
-    ".progress-date-start .date-display"
-  ) as HTMLElement;
-  if (startDateInput && startDateDisplay) {
-    const updateStartDate = (newStartDateStr: string): void => {
-      const newStartDate = parseDate(newStartDateStr);
-      if (!newStartDate) {
-        return;
-      }
+  const updateStartDate = (newStartDateStr: string): void => {
+    const newStartDate = parseDate(newStartDateStr);
+    if (!newStartDate) {
+      return;
+    }
 
-      // Ensure start date is not after end date
-      let finalStartDate = newStartDate;
-      let finalEndDate = data.end;
-      if (newStartDate > data.end) {
-        finalEndDate = newStartDate;
-      }
+    // Ensure start date is not after end date
+    let finalStartDate = newStartDate;
+    let finalEndDate = data.end;
+    if (newStartDate > data.end) {
+      finalEndDate = newStartDate;
+    }
 
-      const basePath = getBasePath();
-      const startDateStr = formatDate(finalStartDate);
-      const endDateStr = formatDate(finalEndDate);
-      const encodedTitle = encodeURIComponent(data.title);
-      const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
+    const basePath = getBasePath();
+    const startDateStr = formatDate(finalStartDate);
+    const endDateStr = formatDate(finalEndDate);
+    const encodedTitle = encodeURIComponent(data.title);
+    const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
 
-      window.history.pushState({}, "", newPath);
+    window.history.pushState({}, "", newPath);
 
-      // Re-render the progress bar with new dates
-      const newData = getProgressBarData(newPath);
-      renderProgressBarToContainer(newData);
-    };
+    // Re-render the progress bar with new dates
+    const newData = getProgressBarData(newPath);
+    renderProgressBarToContainer(newData);
+  };
 
-    startDateInput.addEventListener("change", () => {
-      const newDate = startDateInput.value;
-      if (newDate) {
-        updateStartDate(newDate);
-      }
-    });
-
-    const showDatePicker = (): void => {
-      startDateInput.style.display = "inline-block";
-      startDateDisplay.style.display = "none";
-      startDateInput.focus();
-      startDateInput.showPicker?.();
-    };
-
-    // Show date input on click, hide display
-    startDateDisplay.addEventListener("click", () => {
-      showDatePicker();
-    });
-
-    // Show date picker on Enter key when display is focused
-    startDateDisplay.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        showDatePicker();
-      }
-    });
-
-    // Hide input and show display when input loses focus
-    startDateInput.addEventListener("blur", () => {
-      startDateInput.style.display = "none";
-      startDateDisplay.style.display = "inline";
-    });
-
-    // Handle accesskey (Alt+S or Cmd+S depending on platform)
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (
-        (e.altKey || e.metaKey) &&
-        !e.ctrlKey &&
-        !e.shiftKey &&
-        (e.key === "s" || e.key === "S")
-      ) {
-        // Check if we're not already in an input/textarea/contenteditable
-        const activeElement = document.activeElement;
-        if (
-          activeElement &&
-          (activeElement.tagName === "INPUT" ||
-            activeElement.tagName === "TEXTAREA" ||
-            (activeElement instanceof HTMLElement &&
-              activeElement.isContentEditable))
-        ) {
-          return;
-        }
-        e.preventDefault();
-        showDatePicker();
-      }
-    });
-  }
+  setupDatePicker(
+    "#start-date-input",
+    ".progress-date-start .date-display",
+    "s",
+    updateStartDate
+  );
 
   // Set up end date editing
+  const updateEndDate = (newEndDateStr: string): void => {
+    const newEndDate = parseDate(newEndDateStr);
+    if (!newEndDate) {
+      return;
+    }
+
+    // Ensure end date is not before start date
+    let finalStartDate = data.start;
+    let finalEndDate = newEndDate;
+    if (newEndDate < data.start) {
+      finalStartDate = newEndDate;
+    }
+
+    const basePath = getBasePath();
+    const startDateStr = formatDate(finalStartDate);
+    const endDateStr = formatDate(finalEndDate);
+    const encodedTitle = encodeURIComponent(data.title);
+    const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
+
+    window.history.pushState({}, "", newPath);
+
+    // Re-render the progress bar with new dates
+    const newData = getProgressBarData(newPath);
+    renderProgressBarToContainer(newData);
+  };
+
+  setupDatePicker(
+    "#end-date-input",
+    ".progress-date-end .date-display",
+    "e",
+    updateEndDate
+  );
+
+  // Set up accesskey handlers for date pickers (single handler for both)
+  const startDateInput = container.querySelector(
+    "#start-date-input"
+  ) as HTMLInputElement & { __showPicker?: () => void; __accessKey?: string };
   const endDateInput = container.querySelector(
     "#end-date-input"
-  ) as HTMLInputElement;
-  const endDateDisplay = container.querySelector(
-    ".progress-date-end .date-display"
-  ) as HTMLElement;
-  if (endDateInput && endDateDisplay) {
-    const updateEndDate = (newEndDateStr: string): void => {
-      const newEndDate = parseDate(newEndDateStr);
-      if (!newEndDate) {
-        return;
-      }
+  ) as HTMLInputElement & { __showPicker?: () => void; __accessKey?: string };
 
-      // Ensure end date is not before start date
-      let finalStartDate = data.start;
-      let finalEndDate = newEndDate;
-      if (newEndDate < data.start) {
-        finalStartDate = newEndDate;
-      }
-
-      const basePath = getBasePath();
-      const startDateStr = formatDate(finalStartDate);
-      const endDateStr = formatDate(finalEndDate);
-      const encodedTitle = encodeURIComponent(data.title);
-      const newPath = `${basePath}/${startDateStr}/${endDateStr}/${encodedTitle}`;
-
-      window.history.pushState({}, "", newPath);
-
-      // Re-render the progress bar with new dates
-      const newData = getProgressBarData(newPath);
-      renderProgressBarToContainer(newData);
-    };
-
-    endDateInput.addEventListener("change", () => {
-      const newDate = endDateInput.value;
-      if (newDate) {
-        updateEndDate(newDate);
-      }
-    });
-
-    const showEndDatePicker = (): void => {
-      endDateInput.style.display = "inline-block";
-      endDateDisplay.style.display = "none";
-      endDateInput.focus();
-      endDateInput.showPicker?.();
-    };
-
-    // Show date input on click, hide display
-    endDateDisplay.addEventListener("click", () => {
-      showEndDatePicker();
-    });
-
-    // Show date picker on Enter key when display is focused
-    endDateDisplay.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        showEndDatePicker();
-      }
-    });
-
-    // Hide input and show display when input loses focus
-    endDateInput.addEventListener("blur", () => {
-      endDateInput.style.display = "none";
-      endDateDisplay.style.display = "inline";
-    });
-
-    // Handle accesskey (Alt+E or Cmd+E depending on platform)
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
-      if (
-        (e.altKey || e.metaKey) &&
-        !e.ctrlKey &&
-        !e.shiftKey &&
-        (e.key === "e" || e.key === "E")
-      ) {
-        // Check if we're not already in an input/textarea/contenteditable
+  if (startDateInput && endDateInput) {
+    const handleDatePickerAccessKey = (e: KeyboardEvent): void => {
+      if ((e.altKey || e.metaKey) && !e.ctrlKey && !e.shiftKey) {
         const activeElement = document.activeElement;
         if (
           activeElement &&
@@ -330,10 +289,28 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
         ) {
           return;
         }
-        e.preventDefault();
-        showEndDatePicker();
+
+        const key = e.key.toLowerCase();
+        if (startDateInput.__accessKey === key && startDateInput.__showPicker) {
+          e.preventDefault();
+          startDateInput.__showPicker();
+        } else if (
+          endDateInput.__accessKey === key &&
+          endDateInput.__showPicker
+        ) {
+          e.preventDefault();
+          endDateInput.__showPicker();
+        }
       }
-    });
+    };
+
+    // Remove old handler if it exists and add new one
+    const oldHandler = (document as any).__datePickerAccessKeyHandler;
+    if (oldHandler) {
+      document.removeEventListener("keydown", oldHandler);
+    }
+    (document as any).__datePickerAccessKeyHandler = handleDatePickerAccessKey;
+    document.addEventListener("keydown", handleDatePickerAccessKey);
   }
 
   // Set up share button (only show if sharing is available)
