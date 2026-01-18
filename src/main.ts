@@ -258,7 +258,7 @@ function updateOGTags(data: ProgressBarData, path: string): void {
 
   // Try to use dynamic SVG via service worker, fallback to static image
   const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
-  const ogImagePath = normalizedBasePath === "" ? "/og-image.png" : `${normalizedBasePath}/og-image.png`;
+  const ogImagePath = normalizedBasePath === "" ? "/og-image.svg" : `${normalizedBasePath}/og-image.svg`;
   const ogImageUrl = `${baseUrl}${ogImagePath}?path=${encodeURIComponent(path)}`;
 
   const statusText = generateStatusText(data);

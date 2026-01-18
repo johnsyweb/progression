@@ -58,9 +58,9 @@
           title = currentYear.toString();
         }
 
-        // Use PNG images generated server-side
+        // Use SVG images generated server-side
         const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
-        const ogImagePath = normalizedBasePath === "" ? "/og-image.png" : `${normalizedBasePath}/og-image.png`;
+        const ogImagePath = normalizedBasePath === "" ? "/og-image.svg" : `${normalizedBasePath}/og-image.svg`;
         const ogImageUrl =
           path && path !== "/" && path !== basePath
             ? baseUrl + ogImagePath + "?path=" + encodeURIComponent(path)

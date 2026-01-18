@@ -123,7 +123,7 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(true);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(["<svg></svg>"], { type: "image/svg+xml" })),
+      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
 
     Object.defineProperty(navigator, "share", {
@@ -157,7 +157,7 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(false);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(["<svg></svg>"], { type: "image/svg+xml" })),
+      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
 
     Object.defineProperty(navigator, "share", {
@@ -368,7 +368,7 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(true);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(["<svg></svg>"], { type: "image/svg+xml" })),
+      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
     const mockBaseElement = {
       href: "https://example.com/base/",
@@ -405,7 +405,7 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(true);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(["<svg></svg>"], { type: "image/svg+xml" })),
+      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
 
     window.location.pathname = "/2024-01-01/2024-12-31/My Project";

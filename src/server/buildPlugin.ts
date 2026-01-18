@@ -201,17 +201,6 @@ export function buildPlugin(baseUrl: string, basePath: string): Plugin {
           // The service worker will intercept and override with dynamic content for browsers
           const ogImageSvgPath = join(options.dir, "og-image.svg");
           writeFileSync(ogImageSvgPath, fallbackSvg);
-          
-          // Create a static og-image.png placeholder file
-          // This prevents 404.html from being served before service worker intercepts
-          // The service worker will intercept and override with dynamic PNG for browsers
-          // For now, create a minimal 1x1 transparent PNG as placeholder
-          const transparentPng = Buffer.from(
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-            "base64"
-          );
-          const ogImagePngPath = join(options.dir, "og-image.png");
-          writeFileSync(ogImagePngPath, transparentPng);
 
           // Update HTML with fallback image URL and base tag
           let html = readFileSync(htmlPath, "utf-8");

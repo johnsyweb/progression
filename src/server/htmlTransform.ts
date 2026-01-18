@@ -2,7 +2,7 @@ import type { Plugin } from "vite";
 import type { IncomingMessage } from "http";
 import { getProgressBarData } from "../progressBar";
 import { generateStatusText } from "../utils/svgGenerator";
-import { generateProgressBarPNG } from "../utils/imageGenerator";
+import { generateProgressBarSVG } from "../utils/svgGenerator";
 
 export function htmlTransformPlugin(basePath: string = "/"): Plugin {
   return {
@@ -18,8 +18,8 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
         );
       });
       
-      // Handle og-image.png requests - render progress container to PNG
-      server.middlewares.use("/og-image.png", async (req, res) => {
+      // Handle og-image.svg requests - render progress container to SVG
+      server.middlewares.use("/og-image.svg", async (req, res) => {
         try {
           const url = new URL(req.url || "", `http://${req.headers.host}`);
           let path = url.searchParams.get("path") || "";
@@ -29,12 +29,16 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
             path = path.slice(basePath.length) || "/";
           }
 
-          const data = getProgressBarData(path);
-          const png = await generateProgressBarPNG(data);
+          // Ensure path starts with / for proper parsing
+          if (!path.startsWith("/")) {
+            path = "/" + path;
+          }
 
-          res.setHeader("Content-Type", "image/png");
+          const svg = generateProgressBarSVG(path);
+
+          res.setHeader("Content-Type", "image/svg+xml");
           res.setHeader("Cache-Control", "public, max-age=3600");
-          res.end(png);
+          res.end(svg);
         } catch (error) {
           res.statusCode = 500;
           res.end(`Error generating image: ${error}`);
@@ -46,8 +50,7 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
         if (
           req.url &&
           !req.url.startsWith("/@") &&
-          !req.url.startsWith("/og-image.svg") &&
-          !req.url.startsWith("/og-image.png")
+          !req.url.startsWith("/og-image.svg")
         ) {
           originalUrlMap.set(req, req.url);
         }
@@ -97,7 +100,7 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
             const origin = `http://${req.headers.host || "localhost:5173"}`;
             const ogUrl = origin + (path === "/" ? "" : path);
             const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
-            const ogImagePath = normalizedBasePath === "" ? "/og-image.png" : `${normalizedBasePath}/og-image.png`;
+            const ogImagePath = normalizedBasePath === "" ? "/og-image.svg" : `${normalizedBasePath}/og-image.svg`;
             const ogImageUrl =
               origin +
               ogImagePath +

@@ -1,5 +1,5 @@
 import { ProgressBarData } from "../progressBar";
-import { formatDateLong } from "./dateParser";
+import { formatDateLong, formatDate } from "./dateParser";
 
 export function generateShareText(data: ProgressBarData): string {
   const startFormatted = formatDateLong(data.start);
@@ -27,8 +27,6 @@ export async function shareProgress(
     url,
   };
 
-  console.log("Sharing:", shareData);
-
   // Try to include the image if Web Share API supports files
   if (typeof navigator.share !== "undefined" && navigator.canShare) {
     try {
@@ -38,13 +36,29 @@ export async function shareProgress(
         window.location.pathname
       )}`;
 
-      console.log("Fetching image from:", imageUrl);
+      // Generate unique filename based on dates and title from data
+      const startDate = formatDate(data.start);
+      const endDate = formatDate(data.end);
+      let filename = `progress-${startDate}-${endDate}`;
+      
+      // Add title if present and not default
+      if (data.title && data.title !== "Progress") {
+        // Sanitize title for filename: replace spaces/special chars with dashes
+        const sanitizedTitle = data.title
+          .replace(/[^a-zA-Z0-9-]/g, "-") // Replace non-alphanumeric (except dashes) with dashes
+          .replace(/-+/g, "-") // Collapse multiple dashes
+          .replace(/^-|-$/g, ""); // Remove leading/trailing dashes
+        if (sanitizedTitle) {
+          filename += `-${sanitizedTitle}`;
+        }
+      }
+      filename += ".svg";
 
       // Fetch the SVG and convert to File
       const response = await fetch(imageUrl);
       if (response.ok) {
         const svgBlob = await response.blob();
-        const file = new File([svgBlob], "progress.svg", {
+        const file = new File([svgBlob], filename, {
           type: "image/svg+xml",
         });
 
@@ -52,31 +66,21 @@ export async function shareProgress(
 
         // Check if we can share with files
         if (navigator.canShare(shareDataWithFile)) {
-          console.log("Sharing with image");
           await navigator.share(shareDataWithFile);
           return;
-        } else {
-          console.log("Cannot share with files, falling back to text only");
         }
-      } else {
-        console.warn("Failed to fetch image:", response.status);
       }
     } catch (error) {
-      console.warn(
-        "Could not share with image, falling back to text only:",
-        error
-      );
+      // Fall through to share without image
     }
   }
 
   // Fallback: share without image or copy to clipboard
   if (typeof navigator.share !== "undefined") {
     try {
-      console.log("Sharing without image");
       await navigator.share(shareData);
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
-        console.error("Error sharing:", error);
         // Fallback to clipboard
         if (
           navigator.clipboard &&
@@ -89,7 +93,6 @@ export async function shareProgress(
     }
   } else {
     // No Web Share API, use clipboard
-    console.log("Web Share API not available, using clipboard");
     if (
       navigator.clipboard &&
       typeof navigator.clipboard.writeText === "function"

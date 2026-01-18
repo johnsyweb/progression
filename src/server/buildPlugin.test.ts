@@ -154,7 +154,7 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
     expect(result.success).toBe(true);
   }, 30000);
 
-  it("should intercept og-image.png requests and return valid image", async () => {
+  it("should intercept og-image.svg requests and return valid image", async () => {
     if (!page || !existsSync(swPath)) {
       return; // Skip if setup failed
     }
@@ -185,7 +185,7 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
 
     // Request the OG image with a test path
     const testPath = "/progression/1970-01-01/2038-01-19/Epochalypse%20Now";
-    const imageUrl = `/progression/og-image.png?path=${encodeURIComponent(testPath)}`;
+    const imageUrl = `/progression/og-image.svg?path=${encodeURIComponent(testPath)}`;
 
     const response = await page.goto(`http://localhost:4173${imageUrl}`, {
       timeout: 15000,
@@ -199,7 +199,7 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
     expect(response.status()).toBe(200);
 
     const contentType = response.headers()["content-type"];
-    expect(contentType).toMatch(/image\/(png|svg\+xml)/);
+    expect(contentType).toMatch(/image\/svg\+xml/);
 
     // Get response body and check it's not a 1x1 pixel
     const body = await response.body();
