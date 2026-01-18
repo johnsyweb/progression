@@ -21,8 +21,9 @@ function registerServiceWorker(): void {
 
   const basePath = getBasePath();
   const swPath = basePath === "/" ? "/sw.js" : `${basePath}/sw.js`;
-  const swScope = basePath === "/" ? "/" : basePath.endsWith("/") ? basePath : `${basePath}/`;
-  
+  const swScope =
+    basePath === "/" ? "/" : basePath.endsWith("/") ? basePath : `${basePath}/`;
+
   // First, check if service worker file exists (dev mode returns 404)
   // This prevents registration attempts when the file doesn't exist
   fetch(swPath, { method: "HEAD" })
@@ -34,13 +35,13 @@ function registerServiceWorker(): void {
           updateServiceWorkerStatus("unavailable", "Not available in dev mode");
         });
       }
-      
+
       // Service worker file exists - check if already controlling
       if (navigator.serviceWorker.controller) {
         updateServiceWorkerStatus("active", "Active");
         return;
       }
-      
+
       // Service worker file exists, proceed with registration
       return registerServiceWorkerFile(swPath, swScope);
     })
@@ -53,26 +54,38 @@ function registerServiceWorker(): void {
 }
 
 function unregisterAllServiceWorkers(scope: string): Promise<void> {
-  return navigator.serviceWorker.getRegistrations()
+  return navigator.serviceWorker
+    .getRegistrations()
     .then((registrations) => {
       // Unregister all registrations that match our scope
       const scopeUrl = new URL(scope, window.location.origin);
       const relevantRegistrations = registrations.filter((reg) => {
         const regScopeUrl = new URL(reg.scope);
-        return regScopeUrl.pathname === scopeUrl.pathname || reg.scope === scope || reg.scope === window.location.origin + scope;
+        return (
+          regScopeUrl.pathname === scopeUrl.pathname ||
+          reg.scope === scope ||
+          reg.scope === window.location.origin + scope
+        );
       });
-      
-      return Promise.all(relevantRegistrations.map((reg) => reg.unregister().catch(() => {
-        // Ignore individual unregistration errors
-      })));
+
+      return Promise.all(
+        relevantRegistrations.map((reg) =>
+          reg.unregister().catch(() => {
+            // Ignore individual unregistration errors
+          })
+        )
+      );
     })
     .then(() => {
       // Also unregister the controller if it exists and matches
       if (navigator.serviceWorker.controller) {
-        const controllerScopeUrl = new URL(navigator.serviceWorker.controller.scriptURL);
+        const controllerScopeUrl = new URL(
+          navigator.serviceWorker.controller.scriptURL
+        );
         if (controllerScopeUrl.pathname.includes("/sw.js")) {
           // Try to unregister the controller's registration
-          return navigator.serviceWorker.getRegistration(navigator.serviceWorker.controller.scriptURL)
+          return navigator.serviceWorker
+            .getRegistration(navigator.serviceWorker.controller.scriptURL)
             .then((reg) => reg?.unregister())
             .catch(() => {
               // Ignore errors
@@ -93,72 +106,72 @@ function registerServiceWorkerFile(swPath: string, swScope: string): void {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     updateServiceWorkerStatus("active", "Active");
   });
-  
+
   navigator.serviceWorker
     .register(swPath, { scope: swScope })
-      .then((registration) => {
-        // Check if service worker is already active
-        if (registration.active) {
-          updateServiceWorkerStatus("active", "Active");
-        } else if (registration.installing) {
-          updateServiceWorkerStatus("installing", "Installing...");
-        } else if (registration.waiting) {
-          updateServiceWorkerStatus("installing", "Waiting to activate...");
-        } else {
-          updateServiceWorkerStatus("installing", "Installing...");
-        }
-        
-        // Handle state changes for existing workers
-        const handleStateChange = (worker: ServiceWorker | null) => {
-          if (!worker) return;
-          
-          if (worker.state === "installed") {
-            if (navigator.serviceWorker.controller) {
-              updateServiceWorkerStatus("active", "Active");
-            } else {
-              updateServiceWorkerStatus("installing", "Installed, activating...");
-            }
-          } else if (worker.state === "activating") {
-            updateServiceWorkerStatus("installing", "Activating...");
-          } else if (worker.state === "activated") {
+    .then((registration) => {
+      // Check if service worker is already active
+      if (registration.active) {
+        updateServiceWorkerStatus("active", "Active");
+      } else if (registration.installing) {
+        updateServiceWorkerStatus("installing", "Installing...");
+      } else if (registration.waiting) {
+        updateServiceWorkerStatus("installing", "Waiting to activate...");
+      } else {
+        updateServiceWorkerStatus("installing", "Installing...");
+      }
+
+      // Handle state changes for existing workers
+      const handleStateChange = (worker: ServiceWorker | null) => {
+        if (!worker) return;
+
+        if (worker.state === "installed") {
+          if (navigator.serviceWorker.controller) {
             updateServiceWorkerStatus("active", "Active");
+          } else {
+            updateServiceWorkerStatus("installing", "Installed, activating...");
           }
-        };
-        
-        // Check current worker state and set up listeners
-        if (registration.installing) {
-          handleStateChange(registration.installing);
-          registration.installing.addEventListener("statechange", () => {
-            handleStateChange(registration.installing);
-          });
-        }
-        
-        if (registration.waiting) {
-          handleStateChange(registration.waiting);
-          registration.waiting.addEventListener("statechange", () => {
-            handleStateChange(registration.waiting);
-          });
-        }
-        
-        // Wait for service worker updates
-        registration.addEventListener("updatefound", () => {
-          const newWorker = registration.installing || registration.waiting;
-          if (newWorker) {
-            handleStateChange(newWorker);
-            newWorker.addEventListener("statechange", () => {
-              handleStateChange(newWorker);
-            });
-          }
-        });
-        
-        // Wait for service worker to be ready (this resolves when SW is activated)
-        navigator.serviceWorker.ready.then(() => {
+        } else if (worker.state === "activating") {
+          updateServiceWorkerStatus("installing", "Activating...");
+        } else if (worker.state === "activated") {
           updateServiceWorkerStatus("active", "Active");
+        }
+      };
+
+      // Check current worker state and set up listeners
+      if (registration.installing) {
+        handleStateChange(registration.installing);
+        registration.installing.addEventListener("statechange", () => {
+          handleStateChange(registration.installing);
         });
-      })
-      .catch((error) => {
-        updateServiceWorkerStatus("error", `Error: ${error.message}`);
+      }
+
+      if (registration.waiting) {
+        handleStateChange(registration.waiting);
+        registration.waiting.addEventListener("statechange", () => {
+          handleStateChange(registration.waiting);
+        });
+      }
+
+      // Wait for service worker updates
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing || registration.waiting;
+        if (newWorker) {
+          handleStateChange(newWorker);
+          newWorker.addEventListener("statechange", () => {
+            handleStateChange(newWorker);
+          });
+        }
       });
+
+      // Wait for service worker to be ready (this resolves when SW is activated)
+      navigator.serviceWorker.ready.then(() => {
+        updateServiceWorkerStatus("active", "Active");
+      });
+    })
+    .catch((error) => {
+      updateServiceWorkerStatus("error", `Error: ${error.message}`);
+    });
 }
 
 function updateServiceWorkerStatus(status: string, message: string): void {
@@ -176,40 +189,43 @@ function checkServiceWorkerStatus(): void {
       updateServiceWorkerStatus("active", "Active");
       return;
     }
-    
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      if (registrations.length === 0) {
-        // No registration - registerServiceWorker will be called separately
-        updateServiceWorkerStatus("unavailable", "Not registered");
-      } else {
-        const registration = registrations[0];
-        if (registration.active) {
-          updateServiceWorkerStatus("active", "Active");
-        } else if (registration.installing) {
-          updateServiceWorkerStatus("installing", "Installing...");
-        } else if (registration.waiting) {
-          updateServiceWorkerStatus("installing", "Waiting to activate...");
+
+    navigator.serviceWorker
+      .getRegistrations()
+      .then((registrations) => {
+        if (registrations.length === 0) {
+          // No registration - registerServiceWorker will be called separately
+          updateServiceWorkerStatus("unavailable", "Not registered");
         } else {
-          // Service worker exists but not active - check controller again
-          if (navigator.serviceWorker.controller) {
+          const registration = registrations[0];
+          if (registration.active) {
             updateServiceWorkerStatus("active", "Active");
+          } else if (registration.installing) {
+            updateServiceWorkerStatus("installing", "Installing...");
+          } else if (registration.waiting) {
+            updateServiceWorkerStatus("installing", "Waiting to activate...");
           } else {
-            // Wait a bit and check again - service worker might be activating
-            setTimeout(() => {
-              if (navigator.serviceWorker.controller) {
-                updateServiceWorkerStatus("active", "Active");
-              } else if (registration.active) {
-                updateServiceWorkerStatus("active", "Active");
-              } else {
-                updateServiceWorkerStatus("installing", "Activating...");
-              }
-            }, 500);
+            // Service worker exists but not active - check controller again
+            if (navigator.serviceWorker.controller) {
+              updateServiceWorkerStatus("active", "Active");
+            } else {
+              // Wait a bit and check again - service worker might be activating
+              setTimeout(() => {
+                if (navigator.serviceWorker.controller) {
+                  updateServiceWorkerStatus("active", "Active");
+                } else if (registration.active) {
+                  updateServiceWorkerStatus("active", "Active");
+                } else {
+                  updateServiceWorkerStatus("installing", "Activating...");
+                }
+              }, 500);
+            }
           }
         }
-      }
-    }).catch((error) => {
-      updateServiceWorkerStatus("error", `Error: ${error.message}`);
-    });
+      })
+      .catch((error) => {
+        updateServiceWorkerStatus("error", `Error: ${error.message}`);
+      });
   } else {
     updateServiceWorkerStatus("unavailable", "Not supported");
   }
@@ -234,7 +250,8 @@ function init(): void {
     const startDate = `${currentYear}-01-01`;
     const endDate = `${currentYear}-12-31`;
     // Ensure basePath doesn't have trailing slash, and add dates
-    const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
+    const normalizedBasePath =
+      basePath === "/" ? "" : basePath.replace(/\/$/, "");
     const newPath = `${normalizedBasePath}/${startDate}/${endDate}/${currentYear}`;
 
     // Update URL without page reload
@@ -257,9 +274,14 @@ function updateOGTags(data: ProgressBarData, path: string): void {
   const ogUrl = baseUrl + (path === "/" ? "" : path);
 
   // Try to use dynamic SVG via service worker, fallback to static image
-  const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
-  const ogImagePath = normalizedBasePath === "" ? "/og-image.svg" : `${normalizedBasePath}/og-image.svg`;
-  const ogImageUrl = `${baseUrl}${ogImagePath}?path=${encodeURIComponent(path)}`;
+  // Use PNG screenshot as OG image for better compatibility across platforms
+  const normalizedBasePath =
+    basePath === "/" ? "" : basePath.replace(/\/$/, "");
+  const ogImagePath =
+    normalizedBasePath === ""
+      ? "/assets/screenshot.png"
+      : `${normalizedBasePath}/assets/screenshot.png`;
+  const ogImageUrl = `${baseUrl}${ogImagePath}`;
 
   const statusText = generateStatusText(data);
 
@@ -287,9 +309,7 @@ function updateOGTags(data: ProgressBarData, path: string): void {
     ogDescriptionMeta.setAttribute("content", statusText);
   }
 
-  const twitterImageMeta = document.querySelector(
-    'meta[name="twitter:image"]'
-  );
+  const twitterImageMeta = document.querySelector('meta[name="twitter:image"]');
   if (twitterImageMeta) {
     twitterImageMeta.setAttribute("content", ogImageUrl);
   }
@@ -312,27 +332,27 @@ function updateOGTags(data: ProgressBarData, path: string): void {
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": `${data.title} | www.johnsy.com`,
-      "url": ogUrl,
-      "description": statusText,
-      "author": {
+      name: `${data.title} | www.johnsy.com`,
+      url: ogUrl,
+      description: statusText,
+      author: {
         "@type": "Person",
-        "name": "Pete Johns",
-        "givenName": "Pete",
-        "familyName": "Johns",
-        "alternateName": "Pete Johns (/piːt ʤɒnz/)",
-        "pronouns": "he/him/his",
-        "jobTitle": "Head of Engineering",
-        "url": "https://www.johnsy.com/contact/",
-        "sameAs": [
+        name: "Pete Johns",
+        givenName: "Pete",
+        familyName: "Johns",
+        alternateName: "Pete Johns (/piːt ʤɒnz/)",
+        pronouns: "he/him/his",
+        jobTitle: "Head of Engineering",
+        url: "https://www.johnsy.com/contact/",
+        sameAs: [
           "https://github.com/johnsyweb",
           "https://www.flickr.com/people/johnsyweb/",
         ],
       },
-      "publisher": {
+      publisher: {
         "@type": "Organization",
-        "name": "johnsy.com",
-        "url": "https://www.johnsy.com",
+        name: "johnsy.com",
+        url: "https://www.johnsy.com",
       },
     };
     structuredDataScript.textContent = JSON.stringify(structuredData);
@@ -350,7 +370,9 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
   updateOGTags(data, path);
 
   // Preserve the current title if it exists and has been edited
-  const currentTitleElement = container.querySelector(".progress-title") as HTMLElement;
+  const currentTitleElement = container.querySelector(
+    ".progress-title"
+  ) as HTMLElement;
   const currentTitle = currentTitleElement?.textContent?.trim() || "";
   const shouldPreserveTitle = currentTitle && currentTitle !== data.title;
 
@@ -358,7 +380,9 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
 
   // Restore the preserved title if it was different from the data title
   if (shouldPreserveTitle && currentTitle) {
-    const newTitleElement = container.querySelector(".progress-title") as HTMLElement;
+    const newTitleElement = container.querySelector(
+      ".progress-title"
+    ) as HTMLElement;
     if (newTitleElement) {
       newTitleElement.textContent = currentTitle;
     }
@@ -552,15 +576,17 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
       return;
     }
 
-      // Ensure start date is not after end date
-      const finalStartDate = newStartDate;
-      let finalEndDate = data.end;
-      if (newStartDate > data.end) {
-        finalEndDate = newStartDate;
-      }
+    // Ensure start date is not after end date
+    const finalStartDate = newStartDate;
+    let finalEndDate = data.end;
+    if (newStartDate > data.end) {
+      finalEndDate = newStartDate;
+    }
 
     // Get the current title from the UI (may have unsaved edits)
-    const currentTitleElement = container.querySelector(".progress-title") as HTMLElement;
+    const currentTitleElement = container.querySelector(
+      ".progress-title"
+    ) as HTMLElement;
     const currentTitle = currentTitleElement?.textContent?.trim() || data.title;
 
     const basePath = getBasePath();
@@ -590,15 +616,17 @@ function renderProgressBarToContainer(data: ProgressBarData): void {
       return;
     }
 
-      // Ensure end date is not before start date
-      let finalStartDate = data.start;
-      const finalEndDate = newEndDate;
-      if (newEndDate < data.start) {
-        finalStartDate = newEndDate;
-      }
+    // Ensure end date is not before start date
+    let finalStartDate = data.start;
+    const finalEndDate = newEndDate;
+    if (newEndDate < data.start) {
+      finalStartDate = newEndDate;
+    }
 
     // Get the current title from the UI (may have unsaved edits)
-    const currentTitleElement = container.querySelector(".progress-title") as HTMLElement;
+    const currentTitleElement = container.querySelector(
+      ".progress-title"
+    ) as HTMLElement;
     const currentTitle = currentTitleElement?.textContent?.trim() || data.title;
 
     const basePath = getBasePath();

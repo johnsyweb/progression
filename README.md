@@ -25,14 +25,19 @@ All elements of the progress bar can be edited directly:
 - **Title** - Click the title or press `Alt+T` (or `Cmd+T` on Mac) to edit. Press `Enter` to save or `Escape` to cancel.
 - **Start Date** - Click the start date or press `Alt+S` (or `Cmd+S` on Mac) to open a date picker. The start date is constrained to dates in the past (up to today).
 - **End Date** - Click the end date or press `Alt+E` (or `Cmd+E` on Mac) to open a date picker. The end date is constrained to dates from today onwards.
+- **Share** - Press `Alt+H` (or `Cmd+H` on Mac) to share the progress bar. Uses the Web Share API if available, otherwise falls back to copying the link to clipboard.
 
 When dates are changed, the URL is automatically updated and the progress bar is recalculated. If the start date becomes after the end date (or vice versa), the other date is automatically adjusted to maintain a valid range.
+
+### Sharing
+
+The progress bar can be shared using the Web Share API (on supported platforms) or by copying the link to the clipboard. The share includes a unique SVG image generated dynamically based on the current progress.
 
 ### Appearance
 
 The site supports both light and dark modes, automatically adapting to your system preferences. The color palette matches www.johnsy.com's design system.
 
-![Screenshot of the progress bar interface](./assets/readme-screenshot.png)
+![Screenshot of the progress bar interface](./assets/screenshot.png)
 
 ## Development
 
@@ -82,6 +87,8 @@ pnpm run precommit
 - `src/index.html` - HTML template
 - `src/style.css` - Styles matching www.johnsy.com (supports light and dark modes)
 - `src/utils/share.ts` - Share functionality using Web Share API or clipboard fallback
+- `src/utils/generateSitemap.ts` - Sitemap generation utility
+- `src/utils/escapeXml.ts` - XML/HTML escaping utility
 
 ## Building
 
@@ -134,7 +141,22 @@ Unit tests are written using Vitest and cover:
 - Progress calculation
 - Edge cases (dates outside range, invalid dates, etc.)
 - Default behavior when no dates provided
+- Share functionality
+- SVG generation for different paths
+- Service worker functionality
 
 Run tests with `pnpm run test:run` (single run) or `pnpm test` (watch mode).
+
+## SEO and Metadata
+
+The site includes comprehensive SEO features:
+- Open Graph meta tags for social sharing
+- JSON-LD structured data (WebPage and Person schemas)
+- Dynamic meta descriptions based on progress status
+- Canonical URLs
+- Sitemap.xml generation at build time
+- Dynamic SVG Open Graph images via service worker
+
+The structured data matches the schema used on www.johnsy.com for consistency.
 
 

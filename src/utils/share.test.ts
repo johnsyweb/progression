@@ -123,7 +123,9 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(true);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
+      blob: vi
+        .fn()
+        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
 
     Object.defineProperty(navigator, "share", {
@@ -157,7 +159,9 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(false);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
+      blob: vi
+        .fn()
+        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
 
     Object.defineProperty(navigator, "share", {
@@ -343,7 +347,9 @@ describe("shareProgress", () => {
 
     await shareProgress(mockData, mockUrl);
 
-    expect(global.alert).toHaveBeenCalledWith("Sharing not available in this browser");
+    expect(global.alert).toHaveBeenCalledWith(
+      "Sharing not available in this browser"
+    );
   });
 
   it("should handle clipboard writeText not being a function", async () => {
@@ -360,7 +366,9 @@ describe("shareProgress", () => {
 
     await shareProgress(mockData, mockUrl);
 
-    expect(global.alert).toHaveBeenCalledWith("Sharing not available in this browser");
+    expect(global.alert).toHaveBeenCalledWith(
+      "Sharing not available in this browser"
+    );
   });
 
   it("should use base tag href when available for image URL", async () => {
@@ -368,7 +376,9 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(true);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
+      blob: vi
+        .fn()
+        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
     const mockBaseElement = {
       href: "https://example.com/base/",
@@ -405,7 +415,9 @@ describe("shareProgress", () => {
     const mockCanShare = vi.fn().mockReturnValue(true);
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
+      blob: vi
+        .fn()
+        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
     });
 
     window.location.pathname = "/2024-01-01/2024-12-31/My Project";

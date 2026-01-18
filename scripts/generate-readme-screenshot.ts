@@ -45,7 +45,7 @@ async function generateReadmeScreenshot(): Promise<void> {
     } catch {
       // Directory might already exist
     }
-    const screenshotPath = join(assetsDir, "readme-screenshot.png");
+    const screenshotPath = join(assetsDir, "screenshot.png");
 
     // Write screenshot to file
     writeFileSync(screenshotPath, screenshot);

@@ -44,5 +44,3 @@ export function renderProgressBarForImage(data: ProgressBarData): string {
 
 // Export CSS content placeholder for service worker (will be inlined at build time)
 export const CSS_CONTENT_PLACEHOLDER = "__CSS_CONTENT_PLACEHOLDER__";
-
-

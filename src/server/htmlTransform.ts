@@ -17,7 +17,7 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
           "Service worker is not available in dev mode. Use `pnpm run build && pnpm run preview` to test service worker functionality."
         );
       });
-      
+
       // Handle og-image.svg requests - render progress container to SVG
       server.middlewares.use("/og-image.svg", async (req, res) => {
         try {
@@ -99,8 +99,12 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
 
             const origin = `http://${req.headers.host || "localhost:5173"}`;
             const ogUrl = origin + (path === "/" ? "" : path);
-            const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
-            const ogImagePath = normalizedBasePath === "" ? "/og-image.svg" : `${normalizedBasePath}/og-image.svg`;
+            const normalizedBasePath =
+              basePath === "/" ? "" : basePath.replace(/\/$/, "");
+            const ogImagePath =
+              normalizedBasePath === ""
+                ? "/og-image.svg"
+                : `${normalizedBasePath}/og-image.svg`;
             const ogImageUrl =
               origin +
               ogImagePath +

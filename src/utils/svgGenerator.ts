@@ -31,7 +31,7 @@ export function generateStatusText(data: {
 
 export function generateProgressBarSVG(path: string): string {
   const data = getProgressBarData(path);
-  
+
   // getProgressBarData always returns data (defaults to current year if invalid)
   // So we always have data to work with
 
@@ -71,7 +71,7 @@ export function generateProgressBarSVG(path: string): string {
   if (data.percentage !== null) {
     // Progress fill - match web styling with border-radius (rx="4")
     svg += `<rect x="${padding}" y="${barY}" width="${fillWidth}" height="${barHeight}" fill="#1565C0" rx="4"/>`;
-    
+
     // Progress indicator - 4px wide rectangle at percentage position (matching web CSS)
     // Web uses: width: 4px, transform: translateX(-50%), so indicator is centered at percentage
     const indicatorWidth = 4;

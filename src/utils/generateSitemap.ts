@@ -1,6 +1,9 @@
 export function generateSitemap(baseUrl: string, basePath: string): string {
-  const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
-  const fullUrl = normalizedBasePath ? `${baseUrl}${normalizedBasePath}/` : `${baseUrl}/`;
+  const normalizedBasePath =
+    basePath === "/" ? "" : basePath.replace(/\/$/, "");
+  const fullUrl = normalizedBasePath
+    ? `${baseUrl}${normalizedBasePath}/`
+    : `${baseUrl}/`;
 
   const currentDate = new Date().toISOString().split("T")[0];
 

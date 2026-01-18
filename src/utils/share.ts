@@ -40,7 +40,7 @@ export async function shareProgress(
       const startDate = formatDate(data.start);
       const endDate = formatDate(data.end);
       let filename = `progress-${startDate}-${endDate}`;
-      
+
       // Add title if present and not default
       if (data.title && data.title !== "Progress") {
         // Sanitize title for filename: replace spaces/special chars with dashes
@@ -70,7 +70,7 @@ export async function shareProgress(
           return;
         }
       }
-    } catch (error) {
+    } catch {
       // Fall through to share without image
     }
   }

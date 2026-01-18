@@ -44,13 +44,13 @@ export async function generateProgressBarPNG(
 </html>`;
 
     await page.setContent(fullHtml);
-    
+
     // Wait for fonts and styles to load
     await page.waitForLoadState("networkidle");
 
     // Get the progress-container element
     const container = await page.locator(".progress-container");
-    
+
     // Take screenshot of just the container
     const screenshot = await container.screenshot({
       type: "png",

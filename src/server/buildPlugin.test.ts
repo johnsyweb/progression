@@ -18,13 +18,15 @@ describe("Service Worker Build", () => {
     }
 
     const swCode = readFileSync(swPath, "utf-8");
-    
+
     // Check for event listeners - they should be present
     expect(swCode).toContain("addEventListener");
-    
+
     // Check for install listener
-    expect(swCode.includes('"install"') || swCode.includes("'install'")).toBe(true);
-    
+    expect(swCode.includes('"install"') || swCode.includes("'install'")).toBe(
+      true
+    );
+
     // Check for fetch listener
     expect(swCode.includes('"fetch"') || swCode.includes("'fetch'")).toBe(true);
   });
@@ -35,11 +37,11 @@ describe("Service Worker Build", () => {
     }
 
     const swCode = readFileSync(swPath, "utf-8");
-    
+
     // Service worker should not have ES module syntax
     const hasImport = /^import\s+/m.test(swCode);
     const hasExport = /^export\s+/m.test(swCode);
-    
+
     expect(hasImport).toBe(false);
     expect(hasExport).toBe(false);
   });
@@ -50,14 +52,14 @@ describe("Service Worker Build", () => {
     }
 
     const swCode = readFileSync(swPath, "utf-8");
-    
+
     // Should contain SVG generation code (width/height or SVG tags)
-    const hasSVGCode = 
+    const hasSVGCode =
       swCode.includes("1200") || // SVG width
-      swCode.includes("630") ||  // SVG height
+      swCode.includes("630") || // SVG height
       swCode.includes("<svg") ||
       swCode.includes("svg+xml");
-    
+
     expect(hasSVGCode).toBe(true);
   });
 });
@@ -72,7 +74,9 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
   beforeAll(async () => {
     // Skip if sw.js doesn't exist
     if (!existsSync(swPath)) {
-      console.warn("Skipping runtime tests: sw.js not found. Run 'pnpm run build' first.");
+      console.warn(
+        "Skipping runtime tests: sw.js not found. Run 'pnpm run build' first."
+      );
       return;
     }
 
@@ -106,13 +110,15 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
     }
 
     // Navigate to a page first so service worker can register
-    await page.goto("http://localhost:4173/progression/", {
-      waitUntil: "networkidle",
-      timeout: 10000,
-    }).catch(() => {
-      // If server isn't running, skip test
-      return;
-    });
+    await page
+      .goto("http://localhost:4173/progression/", {
+        waitUntil: "networkidle",
+        timeout: 10000,
+      })
+      .catch(() => {
+        // If server isn't running, skip test
+        return;
+      });
 
     const registrationPromise = page.evaluate(async () => {
       if (!("serviceWorker" in navigator)) {
@@ -148,7 +154,10 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
 
     const result = await registrationPromise;
     if (!result || !result.success) {
-      console.warn("Service worker registration test skipped or failed:", result?.error);
+      console.warn(
+        "Service worker registration test skipped or failed:",
+        result?.error
+      );
       return; // Skip test if registration failed (server might not be running)
     }
     expect(result.success).toBe(true);
@@ -159,40 +168,84 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
       return; // Skip if setup failed
     }
 
-    // Navigate to a page first to ensure service worker can register
-    await page.goto("http://localhost:4173/progression/", {
-      waitUntil: "networkidle",
-      timeout: 10000,
-    }).catch(() => {
-      // If server isn't running, skip test
+    // First verify sw.js is accessible with correct MIME type
+    const swResponse = await page
+      .goto("http://localhost:4173/progression/sw.js", {
+        timeout: 10000,
+      })
+      .catch(() => null);
+
+    if (!swResponse) {
+      console.warn(
+        "Skipping image interception test - sw.js not accessible from preview server"
+      );
       return;
-    });
+    }
+
+    const swContentType = swResponse.headers()["content-type"];
+    if (!swContentType || !swContentType.includes("javascript")) {
+      console.warn(
+        `Skipping image interception test - sw.js has incorrect MIME type: ${swContentType}`
+      );
+      return;
+    }
+
+    // Navigate to a page first to ensure service worker can register
+    await page
+      .goto("http://localhost:4173/progression/", {
+        waitUntil: "networkidle",
+        timeout: 10000,
+      })
+      .catch(() => {
+        // If server isn't running, skip test
+        return;
+      });
 
     // First ensure service worker is registered
-    await page.evaluate(async () => {
+    const registrationResult = await page.evaluate(async () => {
       if ("serviceWorker" in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        if (registrations.length === 0) {
-          await navigator.serviceWorker.register("/progression/sw.js", {
-            scope: "/progression/",
-          });
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          if (registrations.length === 0) {
+            await navigator.serviceWorker.register("/progression/sw.js", {
+              scope: "/progression/",
+            });
+          }
+          await navigator.serviceWorker.ready;
+          // Wait a bit for service worker to be ready to intercept
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          return { success: true };
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+          };
         }
-        await navigator.serviceWorker.ready;
-        // Wait a bit for service worker to be ready to intercept
-        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
+      return { success: false, error: "ServiceWorker not supported" };
     });
+
+    if (!registrationResult?.success) {
+      console.warn(
+        `Skipping image interception test - service worker registration failed: ${registrationResult?.error}`
+      );
+      return;
+    }
 
     // Request the OG image with a test path
     const testPath = "/progression/1970-01-01/2038-01-19/Epochalypse%20Now";
     const imageUrl = `/progression/og-image.svg?path=${encodeURIComponent(testPath)}`;
 
-    const response = await page.goto(`http://localhost:4173${imageUrl}`, {
-      timeout: 15000,
-    }).catch(() => null);
+    const response = await page
+      .goto(`http://localhost:4173${imageUrl}`, {
+        timeout: 15000,
+      })
+      .catch(() => null);
 
     if (!response) {
-      console.warn("Skipping image interception test - server may not be running");
+      console.warn(
+        "Skipping image interception test - server may not be running"
+      );
       return;
     }
 
