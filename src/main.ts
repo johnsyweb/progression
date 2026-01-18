@@ -235,8 +235,13 @@ function init(): void {
   const path = window.location.pathname;
   const basePath = getBasePath();
 
-  // Check if path has valid dates
+  // Don't handle routing for static assets
   const strippedPath = stripBasePath(path, basePath);
+  if (strippedPath.startsWith("/assets/") || strippedPath.startsWith("assets/")) {
+    return; // Let static assets be served directly
+  }
+
+  // Check if path has valid dates
   const parts = strippedPath.split("/").filter((part) => part.length > 0);
   const hasValidDates =
     parts.length >= 2 &&
