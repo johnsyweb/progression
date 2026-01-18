@@ -6,11 +6,23 @@ function getServiceWorkerBasePath(): string {
   const scope = self.registration?.scope || self.location.href;
   const scopeUrl = new URL(scope);
   let pathname = scopeUrl.pathname;
+  
   // Remove trailing slash
   pathname = pathname.replace(/\/$/, "") || "/";
-  // Remove filename (sw.js) if present
-  const basePath = pathname.replace(/\/[^/]*$/, "") || "/";
-  return basePath === "/" ? "/" : basePath;
+  
+  // If pathname ends with sw.js, remove it to get the base path
+  // Otherwise, the pathname itself is the base path (e.g., "/progression")
+  if (pathname.endsWith("/sw.js")) {
+    return pathname.replace(/\/sw\.js$/, "") || "/";
+  }
+  
+  // If pathname is just "/", return it
+  if (pathname === "/") {
+    return "/";
+  }
+  
+  // Otherwise, pathname is the base path (e.g., "/progression")
+  return pathname;
 }
 
 // No CSS needed - we use pure SVG generation
@@ -24,7 +36,8 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event: FetchEvent) => {
-  const url = new URL(event.request.url);
+  // Create URL object from the request URL to ensure we get fresh query params
+  const requestUrl = new URL(event.request.url);
   const basePath = getServiceWorkerBasePath();
   const normalizedBasePath = basePath === "/" ? "/" : basePath.replace(/\/$/, "");
   const expectedPngPath =
@@ -34,14 +47,17 @@ self.addEventListener("fetch", (event: FetchEvent) => {
 
   // Check if this is a PNG or SVG image request
   // Match both exact path and any path ending with /og-image.png or /og-image.svg
-  const isPngRequest = url.pathname === expectedPngPath || url.pathname.endsWith("/og-image.png");
-  const isSvgRequest = url.pathname === expectedSvgPath || url.pathname.endsWith("/og-image.svg");
+  const isPngRequest = requestUrl.pathname === expectedPngPath || requestUrl.pathname.endsWith("/og-image.png");
+  const isSvgRequest = requestUrl.pathname === expectedSvgPath || requestUrl.pathname.endsWith("/og-image.svg");
   
   if (isPngRequest || isSvgRequest) {
-    console.log("[SW] Intercepting image request:", url.pathname, "basePath:", basePath, "path param:", url.searchParams.get("path"));
     // Service worker is intercepting - prevent default fetch
     event.respondWith(
       (async () => {
+        // Re-read the URL from the request to ensure we have the current query params
+        const url = new URL(event.request.url);
+        console.log("[SW] Intercepting image request:", url.pathname, "basePath:", basePath, "full URL:", url.toString(), "path param:", url.searchParams.get("path"));
+        
         let path = url.searchParams.get("path") || "";
         if (basePath !== "/" && path.startsWith(basePath)) {
           path = path.slice(basePath.length) || "/";
@@ -54,8 +70,13 @@ self.addEventListener("fetch", (event: FetchEvent) => {
 
         // Generate pure SVG (no foreignObject) - this works reliably with createImageBitmap
         console.log("[SW] Generating SVG for path:", path);
+        console.log("[SW] Full request URL:", event.request.url);
+        console.log("[SW] Path parameter from URL:", url.searchParams.get("path"));
         const svg = generateProgressBarSVG(path);
         console.log("[SW] SVG generated, length:", svg.length);
+        // Log a snippet of the SVG to verify it's different for different paths
+        const svgTitleMatch = svg.match(/<text[^>]*>([^<]+)<\/text>/);
+        console.log("[SW] SVG title:", svgTitleMatch ? svgTitleMatch[1] : "not found");
 
         // If this is an SVG request, return the SVG directly
         if (isSvgRequest) {
@@ -63,6 +84,8 @@ self.addEventListener("fetch", (event: FetchEvent) => {
             headers: {
               "Content-Type": "image/svg+xml",
               "Cache-Control": "public, max-age=3600",
+              // Add Vary header to ensure different query params are cached separately
+              "Vary": "Accept",
             },
           });
         }
