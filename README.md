@@ -32,6 +32,8 @@ When dates are changed, the URL is automatically updated and the progress bar is
 
 The site supports both light and dark modes, automatically adapting to your system preferences. The color palette matches johnsy.com's design system.
 
+![Screenshot of the progress bar interface](./assets/readme-screenshot.png)
+
 ## Development
 
 ```bash
@@ -49,6 +51,10 @@ pnpm run test:run
 
 # Start development server
 pnpm dev
+
+# Note: Service worker functionality is not available in dev mode.
+# To test service worker features (e.g., OpenGraph image generation),
+# use `pnpm run build && pnpm run preview` instead.
 
 # Format code
 pnpm run format

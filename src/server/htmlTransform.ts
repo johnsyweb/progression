@@ -1,29 +1,44 @@
 import type { Plugin } from "vite";
 import type { IncomingMessage } from "http";
-import { generateProgressBarSVG } from "../utils/svgGenerator";
 import { getProgressBarData } from "../progressBar";
 import { generateStatusText } from "../utils/svgGenerator";
+import { generateProgressBarPNG } from "../utils/imageGenerator";
 
 export function htmlTransformPlugin(basePath: string = "/"): Plugin {
   return {
     name: "html-transform",
     configureServer(server) {
-      server.middlewares.use("/og-image.svg", (req, res) => {
-        const url = new URL(req.url || "", `http://${req.headers.host}`);
-        let path = url.searchParams.get("path") || "";
+      // Service worker is not supported in dev mode
+      // Use `pnpm run build && pnpm run preview` to test service worker functionality
+      server.middlewares.use("/sw.js", (req, res) => {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "text/plain");
+        res.end(
+          "Service worker is not available in dev mode. Use `pnpm run build && pnpm run preview` to test service worker functionality."
+        );
+      });
+      
+      // Handle og-image.png requests - render progress container to PNG
+      server.middlewares.use("/og-image.png", async (req, res) => {
+        try {
+          const url = new URL(req.url || "", `http://${req.headers.host}`);
+          let path = url.searchParams.get("path") || "";
 
-        // Strip base path from the path parameter if present
-        // The path parameter might include the base path (e.g., /progression/2025-07-02/...)
-        // but generateProgressBarSVG expects a path relative to the base
-        if (basePath !== "/" && path.startsWith(basePath)) {
-          path = path.slice(basePath.length) || "/";
+          // Strip base path from the path parameter if present
+          if (basePath !== "/" && path.startsWith(basePath)) {
+            path = path.slice(basePath.length) || "/";
+          }
+
+          const data = getProgressBarData(path);
+          const png = await generateProgressBarPNG(data);
+
+          res.setHeader("Content-Type", "image/png");
+          res.setHeader("Cache-Control", "public, max-age=3600");
+          res.end(png);
+        } catch (error) {
+          res.statusCode = 500;
+          res.end(`Error generating image: ${error}`);
         }
-
-        const svg = generateProgressBarSVG(path);
-
-        res.setHeader("Content-Type", "image/svg+xml");
-        res.setHeader("Cache-Control", "public, max-age=3600");
-        res.end(svg);
       });
       const originalUrlMap = new WeakMap<IncomingMessage, string>();
 
@@ -31,7 +46,8 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
         if (
           req.url &&
           !req.url.startsWith("/@") &&
-          !req.url.startsWith("/og-image.svg")
+          !req.url.startsWith("/og-image.svg") &&
+          !req.url.startsWith("/og-image.png")
         ) {
           originalUrlMap.set(req, req.url);
         }
@@ -80,9 +96,12 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
 
             const origin = `http://${req.headers.host || "localhost:5173"}`;
             const ogUrl = origin + (path === "/" ? "" : path);
+            const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
+            const ogImagePath = normalizedBasePath === "" ? "/og-image.png" : `${normalizedBasePath}/og-image.png`;
             const ogImageUrl =
               origin +
-              "/og-image.svg?path=" +
+              ogImagePath +
+              "?path=" +
               encodeURIComponent(path === "/" ? "" : path);
 
             // Strip base path from path for getProgressBarData

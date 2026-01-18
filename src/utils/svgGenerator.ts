@@ -1,14 +1,6 @@
 import { getProgressBarData } from "../progressBar";
 import { formatDateLong } from "./dateParser";
-
-function escapeSvgText(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import { escapeXml } from "./escapeXml";
 
 export function calculateDaysBetween(start: Date, end: Date): number {
   const msPerDay = 1000 * 60 * 60 * 24;
@@ -39,10 +31,9 @@ export function generateStatusText(data: {
 
 export function generateProgressBarSVG(path: string): string {
   const data = getProgressBarData(path);
-
-  if (!data) {
-    return generateErrorSVG();
-  }
+  
+  // getProgressBarData always returns data (defaults to current year if invalid)
+  // So we always have data to work with
 
   const width = 1200;
   const height = 630;
@@ -72,16 +63,27 @@ export function generateProgressBarSVG(path: string): string {
   let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<rect width="${width}" height="${height}" fill="#fafafa"/>`;
 
-  svg += `<text x="${width / 2}" y="${titleY}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="36" font-weight="bold" fill="#1565C0">${escapeSvgText(data.title)}</text>`;
-  svg += `<text x="${width / 2}" y="${statusY}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="22" fill="#757575">${escapeSvgText(statusText)}</text>`;
+  svg += `<text x="${width / 2}" y="${titleY}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="36" font-weight="bold" fill="#1565C0">${escapeXml(data.title)}</text>`;
+  svg += `<text x="${width / 2}" y="${statusY}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="22" fill="#757575">${escapeXml(statusText)}</text>`;
 
   svg += `<rect x="${padding}" y="${barY}" width="${barWidth}" height="${barHeight}" fill="#E0E0E0" stroke="#BBDEFB" stroke-width="2" rx="4"/>`;
 
   if (data.percentage !== null) {
+    // Progress fill - match web styling with border-radius (rx="4")
     svg += `<rect x="${padding}" y="${barY}" width="${fillWidth}" height="${barHeight}" fill="#1565C0" rx="4"/>`;
-    svg += `<line x1="${indicatorX}" y1="${barY}" x2="${indicatorX}" y2="${barY + barHeight}" stroke="#1565C0" stroke-width="4"/>`;
+    
+    // Progress indicator - 4px wide rectangle at percentage position (matching web CSS)
+    // Web uses: width: 4px, transform: translateX(-50%), so indicator is centered at percentage
+    const indicatorWidth = 4;
+    const indicatorLeft = indicatorX - indicatorWidth / 2;
+    svg += `<rect x="${indicatorLeft}" y="${barY}" width="${indicatorWidth}" height="${barHeight}" fill="#1565C0"/>`;
 
-    svg += `<text x="${indicatorX}" y="${barY + barHeight / 2}" text-anchor="middle" dominant-baseline="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="18" font-weight="bold" fill="#212121">`;
+    // Percentage text - match web font-size (0.9em ≈ 13.5px when base is 15px)
+    // Web uses text-shadow for readability, simulate with white stroke
+    const percentageY = barY + barHeight / 2;
+    const fontSize = 13.5;
+    // Use stroke with opacity for text shadow effect (SVG doesn't support rgba() in attributes, use stroke-opacity)
+    svg += `<text x="${indicatorX}" y="${percentageY}" text-anchor="middle" dominant-baseline="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="${fontSize}" font-weight="bold" fill="#212121" stroke="#ffffff" stroke-opacity="0.8" stroke-width="0.5">`;
     svg += `<tspan x="${indicatorX}" dy="0">${percentageText}</tspan>`;
     svg += `</text>`;
   }
@@ -94,18 +96,6 @@ export function generateProgressBarSVG(path: string): string {
 
   svg += `<text x="${width - padding}" y="${dateY}" text-anchor="end" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="24" fill="#212121">${endFormatted}</text>`;
 
-  svg += `</svg>`;
-
-  return svg;
-}
-
-function generateErrorSVG(): string {
-  const width = 1200;
-  const height = 630;
-
-  let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
-  svg += `<rect width="${width}" height="${height}" fill="#fafafa"/>`;
-  svg += `<text x="${width / 2}" y="${height / 2}" text-anchor="middle" dominant-baseline="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="32" fill="#BF360C">Invalid date range</text>`;
   svg += `</svg>`;
 
   return svg;

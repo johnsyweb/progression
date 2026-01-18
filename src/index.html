@@ -20,7 +20,7 @@
     <meta property="og:url" content="" />
     <meta property="og:description" content="" />
     <meta property="og:image" content="" />
-    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -58,17 +58,13 @@
           title = currentYear.toString();
         }
 
-        // Try to use dynamic SVG via service worker, fallback to static image
-        const ogImagePath =
-          basePath === "/" ? "/og-image.svg" : `${basePath}/og-image.svg`;
-        const fallbackImagePath =
-          basePath === "/"
-            ? "/og-image-fallback.svg"
-            : `${basePath}/og-image-fallback.svg`;
+        // Use PNG images generated server-side
+        const normalizedBasePath = basePath === "/" ? "" : basePath.replace(/\/$/, "");
+        const ogImagePath = normalizedBasePath === "" ? "/og-image.png" : `${normalizedBasePath}/og-image.png`;
         const ogImageUrl =
           path && path !== "/" && path !== basePath
             ? baseUrl + ogImagePath + "?path=" + encodeURIComponent(path)
-            : baseUrl + fallbackImagePath;
+            : baseUrl + ogImagePath + "?path=" + encodeURIComponent(path);
 
         const ogTitleMeta = document.querySelector('meta[property="og:title"]');
         if (ogTitleMeta) {
@@ -92,7 +88,48 @@
           twitterImageMeta.setAttribute("content", ogImageUrl);
         }
 
-        // Description will be updated by main.ts based on the path
+        // Set description based on path
+        // Parse dates from path to calculate status
+        let description = "";
+        if (parts.length >= 2) {
+          try {
+            const startDate = new Date(parts[0]);
+            const endDate = new Date(parts[1]);
+            const current = new Date();
+            
+            if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+              const totalMs = endDate.getTime() - startDate.getTime();
+              const elapsedMs = current.getTime() - startDate.getTime();
+              const totalDays = Math.round(totalMs / (1000 * 60 * 60 * 24));
+              const elapsedDays = Math.round(elapsedMs / (1000 * 60 * 60 * 24));
+              const remainingDays = totalDays - elapsedDays;
+              
+              let percentage = null;
+              if (current >= startDate && current <= endDate) {
+                percentage = (elapsedMs / totalMs) * 100;
+              }
+              
+              if (percentage !== null) {
+                description = `${percentage.toFixed(1)}% complete • ${elapsedDays} days elapsed • ${remainingDays} days remaining`;
+              } else if (current < startDate) {
+                const daysUntilStart = Math.round((startDate.getTime() - current.getTime()) / (1000 * 60 * 60 * 24));
+                description = `Starting in ${daysUntilStart} day${daysUntilStart !== 1 ? "s" : ""}`;
+              } else {
+                const daysSinceEnd = Math.round((current.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
+                description = `Completed ${daysSinceEnd} day${daysSinceEnd !== 1 ? "s" : ""} ago`;
+              }
+            }
+          } catch (e) {
+            // Ignore errors
+          }
+        }
+        
+        const ogDescriptionMeta = document.querySelector(
+          'meta[property="og:description"]'
+        );
+        if (ogDescriptionMeta && description) {
+          ogDescriptionMeta.setAttribute("content", description);
+        }
       })();
     </script>
   </head>
@@ -134,6 +171,11 @@
             Share progress
           </li>
         </ul>
+      </div>
+
+      <div id="service-worker-status" class="service-worker-status" role="status" aria-live="polite">
+        <span class="service-worker-status-label">Service Worker:</span>
+        <span class="service-worker-status-value" id="service-worker-status-value">Checking...</span>
       </div>
 
       <footer id="footer">

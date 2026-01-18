@@ -99,6 +99,42 @@ h1 {
   border: none;
 }
 
+.service-worker-status {
+  max-width: 65ch;
+  width: 100%;
+  margin: 50px auto 20px auto;
+  padding-top: 10px;
+  font-size: 0.85em;
+  border-top: 1px solid #e0e0e0;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.service-worker-status-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.service-worker-status-value {
+  font-family: monospace;
+}
+
+.service-worker-status-value[data-status="active"] {
+  color: #2e7d32;
+}
+
+.service-worker-status-value[data-status="installing"] {
+  color: #f57c00;
+}
+
+.service-worker-status-value[data-status="error"] {
+  color: #c62828;
+}
+
+.service-worker-status-value[data-status="unavailable"] {
+  color: #757575;
+}
+
 #accesskeys {
   max-width: 65ch;
   width: 100%;
@@ -180,7 +216,7 @@ h1 {
 
 .progress-title-wrapper {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
 }
 
 .progress-title {
@@ -265,6 +301,17 @@ h1 {
   background-color: #1565c0;
   transform: translateX(-50%);
   z-index: 15;
+}
+
+.progress-status {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #757575;
+  font-size: 0.95em;
+}
+
+.progress-status-text {
+  margin: 0;
 }
 
 .progress-dates {
@@ -526,6 +573,26 @@ h1 {
     border-color: #2c2c2c;
   }
 
+  .service-worker-status {
+    border-color: #2c2c2c;
+  }
+
+  .service-worker-status-value[data-status="active"] {
+    color: #81c784;
+  }
+
+  .service-worker-status-value[data-status="installing"] {
+    color: #ffb74d;
+  }
+
+  .service-worker-status-value[data-status="error"] {
+    color: #e57373;
+  }
+
+  .service-worker-status-value[data-status="unavailable"] {
+    color: #90a4ae;
+  }
+
   .accesskeys {
     border-color: #2c2c2c;
   }
@@ -574,6 +641,10 @@ h1 {
 
   .progress-indicator {
     background-color: #ffb300;
+  }
+
+  .progress-status {
+    color: #b0bec5;
   }
 
   .progress-percentage {

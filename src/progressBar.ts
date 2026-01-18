@@ -5,6 +5,8 @@ import {
   parseTitleFromPath,
   formatDate,
 } from "./utils/dateParser";
+import { generateStatusText } from "./utils/svgGenerator";
+import { escapeXml } from "./utils/escapeXml";
 
 export interface ProgressBarData {
   start: Date;
@@ -54,7 +56,11 @@ export function renderProgressBar(data: ProgressBarData): string {
   let html = `<div class="progress-container">`;
 
   html += `<div class="progress-title-wrapper">`;
-  html += `<h2 class="progress-title" contenteditable="true" role="textbox" aria-label="Progress title (Alt+T to edit)" tabindex="0" accesskey="t" title="Alt+T to edit">${escapeHtml(data.title)}</h2>`;
+  html += `<h2 class="progress-title" contenteditable="true" role="textbox" aria-label="Progress title (Alt+T to edit)" tabindex="0" accesskey="t" title="Alt+T to edit">${escapeXml(data.title)}</h2>`;
+  html += `</div>`;
+
+  html += `<div class="progress-status">`;
+  html += `<p class="progress-status-text">${escapeXml(generateStatusText(data))}</p>`;
   html += `</div>`;
 
   html += `<div class="progress-bar-wrapper">`;
@@ -91,13 +97,4 @@ export function renderProgressBar(data: ProgressBarData): string {
   html += `</div>`;
 
   return html;
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

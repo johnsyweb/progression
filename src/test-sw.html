@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Service Worker Test</title>
+</head>
+<body>
+  <h1>Service Worker Test</h1>
+  <p id="status">Checking service worker...</p>
+  <img id="test-image" style="max-width: 100%; border: 1px solid #ccc;" />
+  
+  <script>
+    const status = document.getElementById('status');
+    const img = document.getElementById('test-image');
+    
+    // Check service worker registration
+    if ('serviceWorker' in navigator) {
+      status.textContent = 'Service Worker API available';
+      
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        console.log('Current registrations:', registrations.length);
+        registrations.forEach((reg, i) => {
+          console.log(`Registration ${i}:`, {
+            scope: reg.scope,
+            active: reg.active?.state,
+            installing: reg.installing?.state,
+            waiting: reg.waiting?.state,
+          });
+        });
+        
+        if (registrations.length === 0) {
+          status.textContent = 'No service worker registered. Registering...';
+          const basePath = '/progression';
+          // Service worker scope must end with / to be under the script's directory
+          const swScope = basePath.endsWith('/') ? basePath : `${basePath}/`;
+          // Always use sw.js (built file) - works in both preview and production
+          navigator.serviceWorker.register(`${basePath}/sw.js`, { scope: swScope })
+            .then(reg => {
+              console.log('Registered:', reg.scope);
+              status.textContent = 'Service worker registered: ' + reg.scope;
+              return navigator.serviceWorker.ready;
+            })
+            .then(() => {
+              console.log('Service worker ready');
+              status.textContent = 'Service worker ready. Testing PNG...';
+              testPNG();
+            })
+            .catch(err => {
+              console.error('Registration failed:', err);
+              status.textContent = 'Registration failed: ' + err.message;
+            });
+        } else {
+          status.textContent = 'Service worker already registered. Testing PNG...';
+          navigator.serviceWorker.ready.then(() => {
+            console.log('Service worker ready');
+            testPNG();
+          });
+        }
+      });
+    } else {
+      status.textContent = 'Service Worker API not available';
+    }
+    
+    function testPNG() {
+      const url = '/progression/og-image.png?path=%2Fprogression%2F2024-01-01%2F2026-12-31%2Ffoo%2520bar';
+      console.log('Testing PNG URL:', url);
+      
+      img.onload = () => {
+        console.log('Image loaded!', img.naturalWidth, 'x', img.naturalHeight);
+        status.textContent = '✅ Image loaded: ' + img.naturalWidth + 'x' + img.naturalHeight;
+        
+        // Check if it's actually PNG or SVG
+        fetch(url)
+          .then(r => r.blob())
+          .then(blob => {
+            console.log('Image type:', blob.type);
+            status.textContent += ' | Type: ' + blob.type;
+          });
+      };
+      
+      img.onerror = (e) => {
+        console.error('Image failed:', e);
+        status.textContent = '❌ Image failed to load';
+      };
+      
+      img.src = url;
+    }
+    
+    // Listen for service worker messages
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      console.log('Service worker message:', event.data);
+    });
+  </script>
+</body>
+</html>
+

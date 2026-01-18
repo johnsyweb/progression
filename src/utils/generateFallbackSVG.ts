@@ -1,3 +1,5 @@
+import { escapeXml } from "./escapeXml";
+
 export function generateFallbackSVG(title: string = "Progress"): string {
   const width = 1200;
   const height = 630;
@@ -8,19 +10,10 @@ export function generateFallbackSVG(title: string = "Progress"): string {
   const dateY = barY + barHeight + 50;
   const titleY = barY - 50;
 
-  function escapeSvgText(text: string): string {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
   let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
   svg += `<rect width="${width}" height="${height}" fill="#fafafa"/>`;
 
-  svg += `<text x="${width / 2}" y="${titleY}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="36" font-weight="bold" fill="#1565C0">${escapeSvgText(title)}</text>`;
+  svg += `<text x="${width / 2}" y="${titleY}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="36" font-weight="bold" fill="#1565C0">${escapeXml(title)}</text>`;
 
   svg += `<rect x="${padding}" y="${barY}" width="${barWidth}" height="${barHeight}" fill="#E0E0E0" stroke="#BBDEFB" stroke-width="2" rx="4"/>`;
 
