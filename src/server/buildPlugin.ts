@@ -1,7 +1,13 @@
 import type { Plugin } from "vite";
 import { readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { join, dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+import { transpileModule, ModuleKind, ScriptTarget } from "typescript";
 import { generateFallbackSVG } from "../utils/generateFallbackSVG";
+
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export function buildPlugin(baseUrl: string, basePath: string): Plugin {
   return {
@@ -103,6 +109,81 @@ export function buildPlugin(baseUrl: string, basePath: string): Plugin {
         swChunk.code = swChunk.code.replace(/export\s*\{[^}]*?\};?/g, '');
         swChunk.code = swChunk.code.replace(/export\s+default[^;]*?;?/g, '');
         swChunk.code = swChunk.code.replace(/export\s+(?:const|let|var|function|class|async)[^;]*?;?/g, '');
+        
+        // Ensure service worker event listeners are included
+        // Vite may not include top-level side-effect code, so we append it
+        // Check if event listeners are missing and add them
+        if (!swChunk.code.includes('addEventListener')) {
+          // Before extracting event listeners, ensure generateProgressBarSVG is accessible
+          // The function might be minified (e.g., to 'U'), so we need to create an alias
+          // Extract the minified function name by finding the exported function
+          // Since we can't easily map minified names, we'll wrap it in the extracted code itself
+          // Or better: extract the function definition along with the event listeners
+          const swSourcePath = resolve(__dirname, '../sw.ts');
+          try {
+            const swSource = readFileSync(swSourcePath, 'utf-8');
+            // Extract all code after the imports and declare statement (lines 18 onwards)
+            // This includes all event listeners and the getServiceWorkerBasePath function
+            const lines = swSource.split('\n');
+            // Skip the import statement and declare statement (first 3 lines)
+            // Then take everything from the getServiceWorkerBasePath function onwards
+            let startIdx = 0;
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i].trim();
+              if (line.includes('function getServiceWorkerBasePath') || line.includes('self.addEventListener')) {
+                startIdx = i;
+                break;
+              }
+            }
+            const eventListenerCodeRaw = lines.slice(startIdx).join('\n');
+            
+            // Remove the import and declare statements (TypeScript compiler will handle types)
+            let eventListenerCode = eventListenerCodeRaw
+              .replace(/^import[^]*?from[^;]*?;?\s*/m, '')
+              .replace(/^declare\s+const[^;]*?;?\s*/m, '');
+            
+            // Use TypeScript compiler to transpile to plain JavaScript
+            // This removes all type annotations reliably
+            const transpiled = transpileModule(eventListenerCode, {
+              compilerOptions: {
+                target: ScriptTarget.ESNext,
+                module: ModuleKind.None, // Plain JS, no modules
+                removeComments: false,
+                esModuleInterop: true,
+              },
+            });
+            
+            eventListenerCode = transpiled.outputText;
+            
+            // Replace generateProgressBarSVG calls with the minified function name
+            // The minified bundle has the function, but we need to find its name
+            // Look for function with <svg string literal containing 1200 and 630 (minified code is all on one line)
+            // Pattern matches: function U(t){...<svg width="${s}" height="${r}"...} where s=1200, r=630
+            const svgFuncRegex = /function\s+(\w+)\s*\([^)]*\)\s*\{[^<]*<svg[^<]*1200[^<]*630/;
+            const svgFunctionMatch = swChunk.code.match(svgFuncRegex);
+            if (svgFunctionMatch && svgFunctionMatch[1]) {
+              const minifiedName = svgFunctionMatch[1];
+              // Replace generateProgressBarSVG with the minified name in event listener code
+              eventListenerCode = eventListenerCode.replace(/generateProgressBarSVG/g, minifiedName);
+            } else {
+              // Fallback: try simpler pattern matching function with both 1200 and 630
+              const fallbackPattern = /function\s+(\w+)\s*\([^)]*\)\s*\{[^}]*1200[^}]*630/;
+              const fallbackMatch = swChunk.code.match(fallbackPattern);
+              if (fallbackMatch && fallbackMatch[1]) {
+                eventListenerCode = eventListenerCode.replace(/generateProgressBarSVG/g, fallbackMatch[1]);
+              } else {
+                console.warn('Could not find minified SVG function name, service worker may fail');
+              }
+            }
+            
+            if (eventListenerCode) {
+              swChunk.code = swChunk.code + '\n\n' + eventListenerCode;
+            }
+          } catch (err) {
+            // If we can't read the source, continue without it
+            console.warn('Could not read sw.ts source to extract event listeners:', err);
+          }
+        }
       }
     },
     writeBundle(options) {

@@ -29,12 +29,16 @@ self.addEventListener("fetch", (event: FetchEvent) => {
   const normalizedBasePath = basePath === "/" ? "/" : basePath.replace(/\/$/, "");
   const expectedPngPath =
     normalizedBasePath === "/" ? "/og-image.png" : `${normalizedBasePath}/og-image.png`;
+  const expectedSvgPath =
+    normalizedBasePath === "/" ? "/og-image.svg" : `${normalizedBasePath}/og-image.svg`;
 
-  // Check if this is a PNG image request
-  // Match both exact path and any path ending with /og-image.png
+  // Check if this is a PNG or SVG image request
+  // Match both exact path and any path ending with /og-image.png or /og-image.svg
   const isPngRequest = url.pathname === expectedPngPath || url.pathname.endsWith("/og-image.png");
+  const isSvgRequest = url.pathname === expectedSvgPath || url.pathname.endsWith("/og-image.svg");
   
-  if (isPngRequest) {
+  if (isPngRequest || isSvgRequest) {
+    console.log("[SW] Intercepting image request:", url.pathname, "basePath:", basePath, "path param:", url.searchParams.get("path"));
     // Service worker is intercepting - prevent default fetch
     event.respondWith(
       (async () => {
@@ -49,8 +53,21 @@ self.addEventListener("fetch", (event: FetchEvent) => {
         }
 
         // Generate pure SVG (no foreignObject) - this works reliably with createImageBitmap
+        console.log("[SW] Generating SVG for path:", path);
         const svg = generateProgressBarSVG(path);
+        console.log("[SW] SVG generated, length:", svg.length);
 
+        // If this is an SVG request, return the SVG directly
+        if (isSvgRequest) {
+          return new Response(svg, {
+            headers: {
+              "Content-Type": "image/svg+xml",
+              "Cache-Control": "public, max-age=3600",
+            },
+          });
+        }
+
+        // Otherwise, convert SVG to PNG
         try {
           // Convert SVG to PNG using OffscreenCanvas
           if (typeof OffscreenCanvas === "undefined") {
