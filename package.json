@@ -1,7 +1,7 @@
 {
   "name": "progress",
   "version": "1.0.0",
-  "description": "Progress bar microsite for johnsy.com",
+  "description": "Progress bar microsite for www.johnsy.com",
   "type": "module",
   "scripts": {
     "build": "vite build",

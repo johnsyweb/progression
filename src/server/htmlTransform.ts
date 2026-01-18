@@ -113,7 +113,7 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
               dataPath = path.slice(basePath.length) || "/";
             }
             const progressData = getProgressBarData(dataPath);
-            const ogTitle = `${progressData.title} | johnsy.com`;
+            const ogTitle = `${progressData.title} | www.johnsy.com`;
             const ogDescription = generateStatusText(progressData);
 
             let html = responseData.toString("utf-8");
@@ -127,7 +127,7 @@ export function htmlTransformPlugin(basePath: string = "/"): Plugin {
             }
 
             html = html.replace(
-              '<meta property="og:title" content="Progress | johnsy.com" />',
+              '<meta property="og:title" content="Progress | www.johnsy.com" />',
               `<meta property="og:title" content="${ogTitle.replace(/"/g, "&quot;")}" />`
             );
             html = html.replace(

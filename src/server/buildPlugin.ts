@@ -4,6 +4,7 @@ import { join, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { transpileModule, ModuleKind, ScriptTarget } from "typescript";
 import { generateFallbackSVG } from "../utils/generateFallbackSVG";
+import { generateSitemap } from "../utils/generateSitemap";
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -223,6 +224,11 @@ export function buildPlugin(baseUrl: string, basePath: string): Plugin {
           // allowing client-side routing to work
           const notFoundHtmlPath = join(options.dir, "404.html");
           writeFileSync(notFoundHtmlPath, html);
+
+          // Generate and write sitemap.xml
+          const sitemap = generateSitemap(baseUrl, basePath);
+          const sitemapPath = join(options.dir, "sitemap.xml");
+          writeFileSync(sitemapPath, sitemap);
         } catch (error) {
           // File might not exist yet, that's okay
         }

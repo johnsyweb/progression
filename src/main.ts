@@ -263,11 +263,11 @@ function updateOGTags(data: ProgressBarData, path: string): void {
 
   const statusText = generateStatusText(data);
 
-  document.title = `${data.title} | johnsy.com`;
+  document.title = `${data.title} | www.johnsy.com`;
 
   const ogTitleMeta = document.querySelector('meta[property="og:title"]');
   if (ogTitleMeta) {
-    ogTitleMeta.setAttribute("content", `${data.title} | johnsy.com`);
+    ogTitleMeta.setAttribute("content", `${data.title} | www.johnsy.com`);
   }
 
   const ogUrlMeta = document.querySelector('meta[property="og:url"]');
@@ -292,6 +292,50 @@ function updateOGTags(data: ProgressBarData, path: string): void {
   );
   if (twitterImageMeta) {
     twitterImageMeta.setAttribute("content", ogImageUrl);
+  }
+
+  // Update canonical URL
+  const canonicalLink = document.querySelector('link[rel="canonical"]');
+  if (canonicalLink) {
+    canonicalLink.setAttribute("href", ogUrl);
+  }
+
+  // Update meta description
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) {
+    metaDescription.setAttribute("content", statusText);
+  }
+
+  // Update JSON-LD structured data
+  const structuredDataScript = document.getElementById("structured-data");
+  if (structuredDataScript) {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": `${data.title} | www.johnsy.com`,
+      "url": ogUrl,
+      "description": statusText,
+      "author": {
+        "@type": "Person",
+        "name": "Pete Johns",
+        "givenName": "Pete",
+        "familyName": "Johns",
+        "alternateName": "Pete Johns (/piːt ʤɒnz/)",
+        "pronouns": "he/him/his",
+        "jobTitle": "Head of Engineering",
+        "url": "https://www.johnsy.com/contact/",
+        "sameAs": [
+          "https://github.com/johnsyweb",
+          "https://www.flickr.com/people/johnsyweb/",
+        ],
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "johnsy.com",
+        "url": "https://www.johnsy.com",
+      },
+    };
+    structuredDataScript.textContent = JSON.stringify(structuredData);
   }
 }
 

@@ -1,6 +1,6 @@
 # Progress
 
-A microsite for johnsy.com that displays a progress bar based on two dates from the URL path.
+A microsite for www.johnsy.com that displays a progress bar based on two dates from the URL path.
 
 ## Usage
 
@@ -30,7 +30,7 @@ When dates are changed, the URL is automatically updated and the progress bar is
 
 ### Appearance
 
-The site supports both light and dark modes, automatically adapting to your system preferences. The color palette matches johnsy.com's design system.
+The site supports both light and dark modes, automatically adapting to your system preferences. The color palette matches www.johnsy.com's design system.
 
 ![Screenshot of the progress bar interface](./assets/readme-screenshot.png)
 
@@ -80,7 +80,7 @@ pnpm run precommit
 - `src/server/htmlTransform.ts` - Vite plugin for HTML transformation during development
 - `src/server/buildPlugin.ts` - Vite plugin for build-time optimisations
 - `src/index.html` - HTML template
-- `src/style.css` - Styles matching johnsy.com (supports light and dark modes)
+- `src/style.css` - Styles matching www.johnsy.com (supports light and dark modes)
 - `src/utils/share.ts` - Share functionality using Web Share API or clipboard fallback
 
 ## Building

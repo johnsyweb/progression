@@ -17,7 +17,7 @@ export function generateFallbackSVG(title: string = "Progress"): string {
 
   svg += `<rect x="${padding}" y="${barY}" width="${barWidth}" height="${barHeight}" fill="#E0E0E0" stroke="#BBDEFB" stroke-width="2" rx="4"/>`;
 
-  svg += `<text x="${width / 2}" y="${dateY + 30}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="24" fill="#212121">johnsy.com</text>`;
+  svg += `<text x="${width / 2}" y="${dateY + 30}" text-anchor="middle" font-family="Atkinson Hyperlegible, Arial, sans-serif" font-size="24" fill="#212121">www.johnsy.com</text>`;
 
   svg += `</svg>`;
 

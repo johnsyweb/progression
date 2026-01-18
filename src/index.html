@@ -13,18 +13,56 @@
       content="#121212"
       media="(prefers-color-scheme: dark)"
     />
-    <title>Progress | johnsy.com</title>
+    <title>Progress | www.johnsy.com</title>
+    <meta name="description" content="Track progress through time with a visual progress bar. Set start and end dates to see how far you've come." />
+    <link rel="canonical" href="" />
+    <meta name="author" content="Pete Johns" />
     <link rel="stylesheet" href="style.css" />
-    <meta property="og:title" content="Progress | johnsy.com" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="Progress | www.johnsy.com" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="" />
     <meta property="og:description" content="" />
     <meta property="og:image" content="" />
-    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:type" content="image/svg+xml" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="www.johnsy.com" />
+    
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="" />
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" id="structured-data">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Progress | www.johnsy.com",
+      "url": "",
+      "publisher": {
+        "@type": "Organization",
+        "name": "johnsy.com",
+        "url": "https://www.johnsy.com"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Pete Johns",
+        "givenName": "Pete",
+        "familyName": "Johns",
+        "alternateName": "Pete Johns (/piːt ʤɒnz/)",
+        "pronouns": "he/him/his",
+        "jobTitle": "Head of Engineering",
+        "url": "https://www.johnsy.com/contact/",
+        "sameAs": [
+          "https://github.com/johnsyweb",
+          "https://www.flickr.com/people/johnsyweb/"
+        ]
+      },
+      "description": "Track progress through time with a visual progress bar"
+    }
+    </script>
     <script>
       (function () {
         const path = window.location.pathname;
@@ -68,7 +106,7 @@
 
         const ogTitleMeta = document.querySelector('meta[property="og:title"]');
         if (ogTitleMeta) {
-          ogTitleMeta.setAttribute("content", `${title} | johnsy.com`);
+          ogTitleMeta.setAttribute("content", `${title} | www.johnsy.com`);
         }
 
         const ogImageMeta = document.querySelector('meta[property="og:image"]');
@@ -130,13 +168,57 @@
         if (ogDescriptionMeta && description) {
           ogDescriptionMeta.setAttribute("content", description);
         }
+
+        // Update canonical URL
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+          canonicalLink.setAttribute("href", ogUrl);
+        }
+
+        // Update meta description
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription && description) {
+          metaDescription.setAttribute("content", description);
+        }
+
+        // Update JSON-LD structured data
+        const structuredDataScript = document.getElementById("structured-data");
+        if (structuredDataScript) {
+          const structuredData = {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": `${title} | www.johnsy.com`,
+            "url": ogUrl,
+            "description": description || "Track progress through time with a visual progress bar",
+            "author": {
+              "@type": "Person",
+              "name": "Pete Johns",
+              "givenName": "Pete",
+              "familyName": "Johns",
+              "alternateName": "Pete Johns (/piːt ʤɒnz/)",
+              "pronouns": "he/him/his",
+              "jobTitle": "Head of Engineering",
+              "url": "https://www.johnsy.com/contact/",
+              "sameAs": [
+                "https://github.com/johnsyweb",
+                "https://www.flickr.com/people/johnsyweb/"
+              ]
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "johnsy.com",
+              "url": "https://www.johnsy.com"
+            }
+          };
+          structuredDataScript.textContent = JSON.stringify(structuredData);
+        }
       })();
     </script>
   </head>
   <body>
     <div id="page">
       <header id="header">
-        <h1><a href="https://johnsy.com/">johnsy.com</a></h1>
+        <h1><a href="https://www.johnsy.com/">www.johnsy.com</a></h1>
       </header>
 
       <main id="content" role="main">
@@ -181,15 +263,9 @@
       <footer id="footer">
         <p>
           Copyright &copy; 2000-<span id="current-year"></span>
-          <a rel="author" href="https://johnsy.com/about/"
+          <a rel="author" href="https://www.johnsy.com/about/"
             ><em><acronym title="Peter Alexander Johns">paj</acronym></em></a
-          >
-          (<a
-            rel="me"
-            aria-label="@pete.johnsy.com on Bluesky"
-            href="https://bsky.app/profile/pete.johnsy.com"
-            >@pete.johnsy.com</a
-          >) All rights (and some wrongs) reserved.
+          > All rights (and some wrongs) reserved.
         </p>
       </footer>
     </div>
