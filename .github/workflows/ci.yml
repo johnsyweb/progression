@@ -1,16 +1,29 @@
-name: CI
+name: CI and Deploy
 
 on:
   pull_request:
   push:
     branches:
       - "**"
+  workflow_dispatch:
+    inputs:
+      force-deploy:
+        description: "Force deployment even if not on main branch"
+        required: false
+        default: "false"
+        type: boolean
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  test:
+  setup-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,3 +52,47 @@ jobs:
 
       - name: Run tests
         run: pnpm run test:run
+
+  build-for-deploy:
+    runs-on: ubuntu-latest
+    needs: setup-and-test
+    if: |
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+
+      - name: Install tools
+        run: mise install
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          BASE_URL: /${{ github.event.repository.name }}/
+        run: pnpm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-for-deploy
+    if: success()
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
