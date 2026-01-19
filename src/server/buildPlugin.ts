@@ -1,5 +1,12 @@
 import type { Plugin } from "vite";
-import { readFileSync, writeFileSync, readdirSync, statSync, copyFileSync, mkdirSync } from "fs";
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  statSync,
+  copyFileSync,
+  mkdirSync,
+} from "fs";
 import { join, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 import { transpileModule, ModuleKind, ScriptTarget } from "typescript";

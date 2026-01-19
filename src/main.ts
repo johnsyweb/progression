@@ -237,7 +237,10 @@ function init(): void {
 
   // Don't handle routing for static assets
   const strippedPath = stripBasePath(path, basePath);
-  if (strippedPath.startsWith("/assets/") || strippedPath.startsWith("assets/")) {
+  if (
+    strippedPath.startsWith("/assets/") ||
+    strippedPath.startsWith("assets/")
+  ) {
     return; // Let static assets be served directly
   }
 

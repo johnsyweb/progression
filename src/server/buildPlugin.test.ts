@@ -205,7 +205,8 @@ describe("Service Worker Runtime (requires build and preview server)", () => {
     const registrationResult = await page.evaluate(async () => {
       if ("serviceWorker" in navigator) {
         try {
-          const registrations = await navigator.serviceWorker.getRegistrations();
+          const registrations =
+            await navigator.serviceWorker.getRegistrations();
           if (registrations.length === 0) {
             await navigator.serviceWorker.register("/progression/sw.js", {
               scope: "/progression/",

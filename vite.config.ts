@@ -3,14 +3,7 @@ import { htmlTransformPlugin } from "./src/server/htmlTransform";
 import { buildPlugin } from "./src/server/buildPlugin";
 
 const base = process.env.BASE_URL || "/progression/";
-const repoName = process.env.GITHUB_REPOSITORY?.split("/")[1] || "progression";
-const owner = process.env.GITHUB_REPOSITORY_OWNER || "yourusername";
-const githubPagesUrl =
-  base === "/"
-    ? `https://${owner}.github.io/${repoName}`
-    : base.startsWith("http")
-      ? base
-      : `https://${owner}.github.io${base}`;
+const siteUrl = base.startsWith("http") ? base : "https://www.johnsy.com";
 
 export default defineConfig({
   base,
@@ -39,6 +32,6 @@ export default defineConfig({
   },
   plugins: [
     htmlTransformPlugin(base),
-    buildPlugin(githubPagesUrl, base),
+    buildPlugin(siteUrl, base),
   ],
 });
