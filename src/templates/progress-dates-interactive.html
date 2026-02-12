@@ -1,0 +1,43 @@
+<div class="progress-dates">
+  <div class="progress-date-start">
+    <label for="start-date-input" class="visually-hidden">Start date</label
+    ><input
+      type="date"
+      id="start-date-input"
+      class="date-input"
+      value="{{startIso}}"
+      max="{{currentIso}}"
+      aria-label="Start date (Alt+S to edit, must be in the past)"
+      data-date-type="start"
+      accesskey="s"
+    /><span
+      class="date-display"
+      tabindex="0"
+      role="button"
+      aria-label="Start date (Alt+S to edit)"
+      title="Alt+S to edit"
+      >{{startFormatted}}</span
+    >
+  </div>
+  <div class="progress-date-current">{{currentFormatted}}</div>
+  <div class="progress-date-end">
+    <label for="end-date-input" class="visually-hidden">End date</label
+    ><input
+      type="date"
+      id="end-date-input"
+      class="date-input"
+      value="{{endIso}}"
+      min="{{currentIso}}"
+      aria-label="End date (Alt+E to edit, must be from today)"
+      data-date-type="end"
+      accesskey="e"
+    /><span
+      class="date-display"
+      tabindex="0"
+      role="button"
+      aria-label="End date (Alt+E to edit)"
+      title="Alt+E to edit"
+      >{{endFormatted}}</span
+    >
+  </div>
+</div>
