@@ -81,6 +81,36 @@ function updateOGTags(data: ProgressBarData, path: string): void {
     ogTitleMeta.setAttribute("content", `${data.title} | www.johnsy.com`);
   }
 
+  const breadcrumbCurrent = document.getElementById("breadcrumb-current");
+  if (breadcrumbCurrent) {
+    breadcrumbCurrent.textContent = data.title;
+  }
+  const breadcrumbDataScript = document.getElementById("breadcrumb-data");
+  if (breadcrumbDataScript) {
+    const progressionFullUrl =
+      baseUrl + (basePath === "/" ? "/" : basePath.replace(/\/$/, "") + "/");
+    const breadcrumbData = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "johnsy.com",
+          item: "https://www.johnsy.com/",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Progression",
+          item: progressionFullUrl,
+        },
+        { "@type": "ListItem", position: 3, name: data.title, item: ogUrl },
+      ],
+    };
+    breadcrumbDataScript.textContent = JSON.stringify(breadcrumbData);
+  }
+
   const ogUrlMeta = document.querySelector('meta[property="og:url"]');
   if (ogUrlMeta) {
     ogUrlMeta.setAttribute("content", ogUrl);
