@@ -21,40 +21,30 @@ function captureProgressContainerAsPNG(
   container: HTMLElement,
   filename: string
 ): Promise<File | null> {
-  const shareWrapper = container.querySelector(
-    ".progress-share"
-  ) as HTMLElement | null;
-  const wasHidden = shareWrapper?.style.display === "none";
-  if (shareWrapper && !wasHidden) {
-    shareWrapper.style.display = "none";
-  }
+  const progressContainer = container.querySelector(".progress-container");
+  const elementToCapture =
+    progressContainer instanceof HTMLElement ? progressContainer : container;
 
-  return html2canvas(container, {
+  return html2canvas(elementToCapture, {
     useCORS: true,
     scale: 2,
     backgroundColor: null,
     logging: false,
-  })
-    .then((canvas) => {
-      return new Promise<File | null>((resolve) => {
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(new File([blob], filename, { type: "image/png" }));
-            } else {
-              resolve(null);
-            }
-          },
-          "image/png",
-          0.95
-        );
-      });
-    })
-    .finally(() => {
-      if (shareWrapper && !wasHidden) {
-        shareWrapper.style.display = "";
-      }
+  }).then((canvas) => {
+    return new Promise<File | null>((resolve) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], filename, { type: "image/png" }));
+          } else {
+            resolve(null);
+          }
+        },
+        "image/png",
+        0.95
+      );
     });
+  });
 }
 
 function buildShareImageFilename(data: ProgressBarData): string {

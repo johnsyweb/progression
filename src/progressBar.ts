@@ -88,12 +88,11 @@ export function renderProgressBar(data: ProgressBarData): string {
   html += `<span class="date-display" tabindex="0" role="button" aria-label="End date (Alt+E to edit)" title="Alt+E to edit">${endFormatted}</span>`;
   html += `</div>`;
   html += `</div>`;
-
-  // Always include share button - availability will be checked in JavaScript
-  html += `<div class="progress-share">`;
-  html += `<button class="share-button" data-share="true" aria-label="Share progress (Alt+H)" accesskey="h" title="Alt+H to share">Share</button>`;
   html += `</div>`;
 
+  // Share button outside progress-container so it is not in the share image
+  html += `<div class="progress-share">`;
+  html += `<button class="share-button" data-share="true" aria-label="Share progress (Alt+H)" accesskey="h" title="Alt+H to share">Share</button>`;
   html += `</div>`;
 
   return html;
