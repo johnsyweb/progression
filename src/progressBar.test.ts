@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { getProgressBarData, renderProgressBar } from "./progressBar";
+import { getProgressBarData } from "./progressBar";
+import { renderProgressBar } from "./utils/renderProgressBar";
 
 describe("getProgressBarData", () => {
   beforeEach(() => {

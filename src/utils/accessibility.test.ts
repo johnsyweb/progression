@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderProgressBar } from "../progressBar";
+import { renderProgressBar } from "./renderProgressBar";
 
 // Helper function to calculate relative luminance (WCAG formula)
 function getLuminance(hex: string): number {

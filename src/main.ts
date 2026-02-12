@@ -1,8 +1,5 @@
-import {
-  getProgressBarData,
-  renderProgressBar,
-  ProgressBarData,
-} from "./progressBar";
+import { getProgressBarData, ProgressBarData } from "./progressBar";
+import { renderProgressBar } from "./utils/renderProgressBar";
 import {
   getBasePath,
   stripBasePath,
