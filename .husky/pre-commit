@@ -1,1 +1,1 @@
-pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run
+mise exec -- sh -c 'pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test:run'

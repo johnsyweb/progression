@@ -5,7 +5,7 @@ import {
   parseTitleFromPath,
   formatDate,
 } from "./utils/dateParser";
-import { generateStatusText } from "./utils/svgGenerator";
+import { generateStatusText } from "./utils/progressStatus";
 import { escapeXml } from "./utils/escapeXml";
 
 export interface ProgressBarData {

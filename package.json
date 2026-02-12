@@ -17,9 +17,7 @@
     "precommit": "pnpm run format && pnpm run lint && pnpm run typecheck && pnpm run test:run",
     "prepare": "husky",
     "generate:screenshot:build": "tsc scripts/generate-readme-screenshot.ts --outDir scripts --esModuleInterop --skipLibCheck --module es2020 --target es2020 --moduleResolution node",
-    "generate:screenshot": "pnpm run generate:screenshot:build && node scripts/generate-readme-screenshot.js",
-    "test:sw:build": "tsc scripts/test-service-worker.ts --outDir scripts --esModuleInterop --skipLibCheck --module es2020 --target es2020 --moduleResolution node",
-    "test:sw": "pnpm run test:sw:build && node scripts/test-service-worker.js"
+    "generate:screenshot": "pnpm run generate:screenshot:build && node scripts/generate-readme-screenshot.js"
   },
   "keywords": [],
   "author": "Pete Johns",

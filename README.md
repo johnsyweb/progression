@@ -31,7 +31,7 @@ When dates are changed, the URL is automatically updated and the progress bar is
 
 ### Sharing
 
-The progress bar can be shared using the Web Share API (on supported platforms) or by copying the link to the clipboard. The share includes a unique SVG image generated dynamically based on the current progress.
+The progress bar can be shared using the Web Share API (on supported platforms) or by copying the link to the clipboard. When sharing with the Web Share API, a PNG screenshot of the progress bar (excluding the Share button) is captured and included.
 
 ### Appearance
 
@@ -57,10 +57,6 @@ pnpm run test:run
 # Start development server
 pnpm dev
 
-# Note: Service worker functionality is not available in dev mode.
-# To test service worker features (e.g., OpenGraph image generation),
-# use `pnpm run build && pnpm run preview` instead.
-
 # Format code
 pnpm run format
 
@@ -79,14 +75,12 @@ pnpm run precommit
 - `src/main.ts` - Entry point, initialises the progress bar and handles URL redirects
 - `src/progressBar.ts` - Progress bar logic and rendering
 - `src/utils/dateParser.ts` - Date parsing and progress calculation utilities
-- `src/utils/svgGenerator.ts` - SVG generation for OpenGraph images
-- `src/utils/generateFallbackSVG.ts` - Static fallback SVG generation
-- `src/sw.ts` - Service worker for dynamic SVG generation
+- `src/utils/progressStatus.ts` - Status text and date calculations for the progress bar
 - `src/server/htmlTransform.ts` - Vite plugin for HTML transformation during development
 - `src/server/buildPlugin.ts` - Vite plugin for build-time optimisations
 - `src/index.html` - HTML template
 - `src/style.css` - Styles matching www.johnsy.com (supports light and dark modes)
-- `src/utils/share.ts` - Share functionality using Web Share API or clipboard fallback
+- `src/utils/share.ts` - Share functionality: captures progress bar as PNG (excluding Share button) and uses Web Share API or clipboard fallback
 - `src/utils/generateSitemap.ts` - Sitemap generation utility
 - `src/utils/escapeXml.ts` - XML/HTML escaping utility
 
@@ -141,9 +135,7 @@ Unit tests are written using Vitest and cover:
 - Progress calculation
 - Edge cases (dates outside range, invalid dates, etc.)
 - Default behavior when no dates provided
-- Share functionality
-- SVG generation for different paths
-- Service worker functionality
+- Share functionality (including PNG capture via html2canvas)
 
 Run tests with `pnpm run test:run` (single run) or `pnpm test` (watch mode).
 
@@ -155,7 +147,7 @@ The site includes comprehensive SEO features:
 - Dynamic meta descriptions based on progress status
 - Canonical URLs
 - Sitemap.xml generation at build time
-- Dynamic SVG Open Graph images via service worker
+- Generic screenshot for Open Graph and Twitter card images
 
 The structured data matches the schema used on www.johnsy.com for consistency.
 

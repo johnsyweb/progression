@@ -12,21 +12,9 @@ export default defineConfig({
     outDir: "../dist",
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: "src/index.html",
-        sw: "src/sw.ts",
-      },
+      input: "src/index.html",
       output: {
-        entryFileNames: (chunkInfo) => {
-          return chunkInfo.name === "sw" ? "sw.js" : "[name]-[hash].js";
-        },
-        // Don't create shared chunks between main and sw to prevent cross-imports
-        // The build plugin will inline all dependencies into sw.js
-        manualChunks: (id) => {
-          // Prevent any chunking that would create dependencies between main and sw
-          // Each entry point should be self-contained
-          return null;
-        },
+        entryFileNames: "[name]-[hash].js",
       },
     },
   },

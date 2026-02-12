@@ -1,9 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-  calculateDaysBetween,
-  generateStatusText,
-  generateProgressBarSVG,
-} from "./svgGenerator";
+import { describe, it, expect } from "vitest";
+import { calculateDaysBetween, generateStatusText } from "./progressStatus";
 
 describe("calculateDaysBetween", () => {
   it("should calculate days between two dates", () => {
@@ -123,81 +119,5 @@ describe("generateStatusText", () => {
 
     const status = generateStatusText(data);
     expect(status).toBe("Completed 5 days ago");
-  });
-});
-
-describe("generateProgressBarSVG", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  it("should generate SVG for valid path", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31");
-    expect(svg).toContain("<svg");
-    expect(svg).toContain('width="1200"');
-    expect(svg).toContain('height="630"');
-    expect(svg).toContain("Progress");
-  });
-
-  it("should include title in SVG", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31/Test Title");
-    expect(svg).toContain("Test Title");
-  });
-
-  it("should include status text in SVG", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31");
-    expect(svg).toContain("% complete");
-    expect(svg).toContain("days elapsed");
-  });
-
-  it("should include progress bar elements when percentage is not null", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31");
-    expect(svg).toContain("<rect"); // Progress bar background and fill
-    // Progress indicator is a rect (not a line) to match web styling
-    const rectMatches = svg.match(/<rect/g);
-    expect(rectMatches?.length).toBeGreaterThanOrEqual(2); // Background, fill, and indicator
-    expect(svg).toContain("<text"); // Percentage text
-  });
-
-  it("should include dates in SVG", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31");
-    expect(svg).toContain("2024"); // Year should appear in formatted dates
-  });
-
-  it("should escape HTML entities in title", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31/Test & Title");
-    expect(svg).toContain("&amp;");
-    expect(svg).not.toContain("Test & Title");
-  });
-
-  it("should escape HTML entities in status text", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31");
-    // Status text should be properly escaped (SVG contains tags, but text content should be escaped)
-    // Check that the SVG structure is valid
-    expect(svg).toContain("<svg");
-    expect(svg).toContain("</svg>");
-  });
-
-  it("should generate default progress bar for invalid path", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/invalid");
-    expect(svg).toContain("<svg");
-    // Invalid paths return default current year progress bar, not error SVG
-    expect(svg).toContain("2024");
-  });
-
-  it("should use correct colors", () => {
-    vi.setSystemTime(new Date("2024-06-15"));
-    const svg = generateProgressBarSVG("/2024-01-01/2024-12-31");
-    expect(svg).toContain("#fafafa"); // Background
-    expect(svg).toContain("#1565C0"); // Title and progress fill
-    expect(svg).toContain("#E0E0E0"); // Progress bar background
   });
 });
