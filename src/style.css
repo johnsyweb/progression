@@ -83,10 +83,13 @@ h1 {
 }
 
 #header {
-  width: 100%;
-  margin: 0;
-  padding: 1rem 10px;
   margin-bottom: 50px;
+}
+
+.header-inner {
+  max-width: 65ch;
+  margin: 0 auto;
+  padding: 1rem 10px;
 }
 
 #header .breadcrumbs {
@@ -130,10 +133,14 @@ h1 {
 }
 
 #footer {
-  width: 100%;
-  margin: 50px 0 0 0;
-  padding: 1rem 10px;
+  margin-top: 50px;
   font-size: 0.85em;
+}
+
+.footer-inner {
+  max-width: 65ch;
+  margin: 0 auto;
+  padding: 1rem 10px;
 }
 
 .accesskeys {
@@ -733,9 +740,9 @@ h1 {
 
 @media all and (max-width: 870px) {
   #page,
-  #header,
   #content,
-  #footer {
+  .header-inner,
+  .footer-inner {
     width: inherit;
     padding-left: 10px;
     padding-right: 10px;

@@ -312,8 +312,8 @@
     </script>
   </head>
   <body>
-    <div id="page">
-      <header id="header">
+    <header id="header">
+      <div class="header-inner">
         <nav class="breadcrumbs" aria-label="Breadcrumb" id="breadcrumb-nav">
           <a href="https://www.johnsy.com/">johnsy.com</a>
           <span aria-hidden="true">/</span>
@@ -328,8 +328,10 @@
             >Progression</a
           >
         </h1>
-      </header>
+      </div>
+    </header>
 
+    <div id="page">
       <main id="content" role="main">
         <div id="progress-container"></div>
       </main>
@@ -363,8 +365,10 @@
           </li>
         </ul>
       </div>
+    </div>
 
-      <footer id="footer">
+    <footer id="footer">
+      <div class="footer-inner">
         <p>
           Copyright &copy; 2000-<span id="current-year"></span>
           <a rel="author" href="https://www.johnsy.com/about/"
@@ -372,8 +376,8 @@
           >
           All rights (and some wrongs) reserved.
         </p>
-      </footer>
-    </div>
+      </div>
+    </footer>
 
     <script type="module" src="/main.ts"></script>
     <script>
