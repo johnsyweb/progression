@@ -114,7 +114,7 @@ The CI workflow runs on:
 - Pull requests
 - Pushes to any branch
 
-It runs tests, linting, type checking, builds the project, and verifies that `assets/screenshot.png` is up to date (regenerate with `pnpm run generate:screenshot` after starting the preview server).
+It runs tests, linting, type checking, and builds the project. If the generated screenshot differs from `assets/screenshot.png`, CI commits and pushes the new screenshot automatically.
 
 ### Deploy Workflow
 

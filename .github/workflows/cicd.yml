@@ -122,6 +122,8 @@ jobs:
   screenshot:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -151,14 +153,20 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Verify screenshot is up to date
+      - name: Generate and commit screenshot if changed
         env:
           BASE_URL: /${{ github.event.repository.name }}/
         run: |
           pnpm run preview -- --port 4173 --strictPort &
           sleep 8
           pnpm run generate:screenshot
-          git diff --exit-code assets/screenshot.png || (echo "::error::Screenshot is out of date. Run 'pnpm run build && pnpm run preview &' then in another terminal 'sleep 5 && pnpm run generate:screenshot', then commit assets/screenshot.png" && exit 1)
+          if ! git diff --exit-code assets/screenshot.png; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add assets/screenshot.png
+            git commit -m "chore(assets): update screenshot"
+            git push
+          fi
 
   build-for-deploy:
     runs-on: ubuntu-latest
