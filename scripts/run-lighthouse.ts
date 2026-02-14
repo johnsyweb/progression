@@ -4,7 +4,8 @@ import path from "node:path";
 import process from "node:process";
 
 const DEFAULT_PORT = "4173";
-const basePath = (process.env.BASE_URL ?? "/progression/").replace(/\/$/, "") || "";
+const basePath =
+  (process.env.BASE_URL ?? "/progression/").replace(/\/$/, "") || "";
 const pathSegment = basePath ? `${basePath}/` : "/";
 const DEFAULT_URL = `http://localhost:${DEFAULT_PORT}${pathSegment}`;
 

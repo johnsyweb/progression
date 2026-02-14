@@ -7,10 +7,12 @@ async function generateReadmeScreenshot() {
     try {
         // Set viewport size for consistent screenshot
         await page.setViewportSize({ width: 1200, height: 800 });
-        // Navigate to local preview server or build
-        // This assumes the preview server is running or we're using a built version
-        const path = "/progression/2025-07-01/2026-06-30/Pete's%20Career%20Break";
-        const url = `http://localhost:4173${path}`;
+        const basePath = (process.env.BASE_URL ?? "/progression/").replace(/\/$/, "") ||
+            "/progression";
+        const pathSegment = "/2025-07-01/2026-06-30/Pete's%20Career%20Break";
+        const path = `${basePath}${pathSegment}`;
+        const port = process.env.PREVIEW_PORT ?? "4173";
+        const url = `http://localhost:${port}${path}`;
         console.log(`Navigating to: ${url}`);
         // Try to navigate - if preview server isn't running, use a fallback
         try {

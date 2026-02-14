@@ -72,6 +72,10 @@ pnpm run precommit
 # Run Lighthouse (performance, accessibility, best-practices, SEO)
 # Build first, then run. Set BASE_URL to match your deploy path if needed.
 pnpm run build && pnpm run lighthouse
+
+# Regenerate README/OG screenshot (preview server must be running)
+pnpm run build && pnpm run preview &
+sleep 5 && pnpm run generate:screenshot
 ```
 
 ## Project Structure
@@ -110,7 +114,7 @@ The CI workflow runs on:
 - Pull requests
 - Pushes to any branch
 
-It runs tests, linting, type checking, and builds the project to ensure code quality.
+It runs tests, linting, type checking, builds the project, and verifies that `assets/screenshot.png` is up to date (regenerate with `pnpm run generate:screenshot` after starting the preview server).
 
 ### Deploy Workflow
 
