@@ -3,5 +3,7 @@ dist/
 *.log
 .DS_Store
 coverage/
+lighthouse-report.json
+
 
 

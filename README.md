@@ -68,6 +68,10 @@ pnpm run typecheck
 
 # Run all checks (format, lint, typecheck, test)
 pnpm run precommit
+
+# Run Lighthouse (performance, accessibility, best-practices, SEO)
+# Build first, then run. Set BASE_URL to match your deploy path if needed.
+pnpm run build && pnpm run lighthouse
 ```
 
 ## Project Structure
