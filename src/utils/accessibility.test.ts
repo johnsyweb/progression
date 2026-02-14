@@ -173,9 +173,9 @@ describe("Accessibility - Semantic HTML", () => {
 
     const html = renderProgressBar(data);
 
-    // Should have a heading element for the title
-    expect(html).toContain("<h2");
+    // Should have an editable title (div with role=textbox for ARIA compliance)
     expect(html).toContain('class="progress-title"');
+    expect(html).toContain('role="textbox"');
 
     // Should have labels for form inputs
     expect(html).toContain("<label");
