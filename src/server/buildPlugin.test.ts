@@ -24,6 +24,15 @@ describe("Build Plugin", () => {
     expect(existsSync(sitemapPath)).toBe(true);
   });
 
+  it("should produce manifest.webmanifest", () => {
+    const manifestPath = join(distPath, "manifest.webmanifest");
+    expect(existsSync(manifestPath)).toBe(true);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+    expect(manifest.short_name).toBe("Progress");
+    expect(manifest.icons).toBeDefined();
+    expect(manifest.icons.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("should inject base tag when base path is not root", () => {
     const htmlPath = join(distPath, "index.html");
     if (!existsSync(htmlPath)) {

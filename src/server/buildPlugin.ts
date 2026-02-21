@@ -10,6 +10,34 @@ import {
 import { join, resolve } from "path";
 import { generateSitemap } from "../utils/generateSitemap";
 
+function generateManifest(): string {
+  const manifest = {
+    name: "Progress | www.johnsy.com",
+    short_name: "Progress",
+    description:
+      "Track progress through time with a visual progress bar. Set start and end dates to see how far you've come.",
+    start_url: ".",
+    display: "standalone",
+    theme_color: "#1565c0",
+    background_color: "#fafafa",
+    icons: [
+      {
+        src: "assets/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "assets/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+    ],
+  };
+  return JSON.stringify(manifest, null, 2);
+}
+
 function copyDirectory(source: string, destination: string): void {
   mkdirSync(destination, { recursive: true });
   const entries = readdirSync(source, { withFileTypes: true });
@@ -50,6 +78,10 @@ export function buildPlugin(baseUrl: string, basePath: string): Plugin {
           const sitemap = generateSitemap(baseUrl, basePath);
           const sitemapPath = join(options.dir, "sitemap.xml");
           writeFileSync(sitemapPath, sitemap);
+
+          const manifest = generateManifest();
+          const manifestPath = join(options.dir, "manifest.webmanifest");
+          writeFileSync(manifestPath, manifest);
 
           const assetsSourceDir = resolve(process.cwd(), "assets");
           const assetsDestDir = join(options.dir, "assets");

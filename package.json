@@ -18,7 +18,8 @@
     "prepare": "husky",
     "lighthouse": "tsx scripts/run-lighthouse.ts",
     "generate:screenshot:build": "tsc scripts/generate-readme-screenshot.ts --outDir scripts --esModuleInterop --skipLibCheck --module es2020 --target es2020 --moduleResolution node",
-    "generate:screenshot": "pnpm run generate:screenshot:build && node scripts/generate-readme-screenshot.js"
+    "generate:screenshot": "pnpm run generate:screenshot:build && node scripts/generate-readme-screenshot.js",
+    "generate:icons": "tsx scripts/generate-icons.ts"
   },
   "keywords": [],
   "author": "Pete Johns",

@@ -76,6 +76,9 @@ pnpm run build && pnpm run lighthouse
 # Regenerate README/OG screenshot (preview server must be running)
 pnpm run build && pnpm run preview &
 sleep 5 && pnpm run generate:screenshot
+
+# Regenerate PWA/app icons (PNG from assets/icon.svg)
+pnpm run generate:icons
 ```
 
 ## Project Structure
@@ -111,6 +114,7 @@ The project is configured to deploy to GitHub Pages automatically via GitHub Act
 ### CI Workflow
 
 The CI workflow runs on:
+
 - Pull requests
 - Pushes to any branch
 
@@ -119,6 +123,7 @@ It runs tests, linting, type checking, and builds the project. If the generated 
 ### Deploy Workflow
 
 The deploy workflow:
+
 - Runs automatically when CI completes successfully on the `main` branch
 - Can be manually triggered via GitHub Actions UI
 - Deploys to GitHub Pages only after all checks pass
@@ -138,6 +143,7 @@ Dependabot is configured to automatically create PRs for dependency updates. PRs
 ## Testing
 
 Unit tests are written using Vitest and cover:
+
 - Date parsing from URL paths (including base path handling)
 - Title parsing from URL paths
 - Progress calculation
@@ -150,6 +156,7 @@ Run tests with `pnpm run test:run` (single run) or `pnpm test` (watch mode).
 ## SEO and Metadata
 
 The site includes comprehensive SEO features:
+
 - Open Graph meta tags for social sharing
 - JSON-LD structured data (WebPage and Person schemas)
 - Dynamic meta descriptions based on progress status
@@ -159,4 +166,9 @@ The site includes comprehensive SEO features:
 
 The structured data matches the schema used on www.johnsy.com for consistency.
 
+## Add to Home Screen (PWA)
 
+When the site is saved to a device home screen (e.g. iPhone “Add to Home Screen”), the same icon and metadata as the website are used:
+
+- **Icon**: The clock favicon is provided as `assets/icon.svg` (browser tab) and as PNGs for home screen use: `apple-touch-icon` (180×180) and `manifest.webmanifest` icons (192×192, 512×512). PNGs are generated from the SVG via `pnpm run generate:icons`.
+- **Metadata**: The web app manifest (`manifest.webmanifest`, emitted at build time) sets the app name (“Progress”), description, theme colour, and icons so that the saved app matches the site branding.
