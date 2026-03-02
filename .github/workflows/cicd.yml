@@ -120,6 +120,7 @@ jobs:
           BASE_URL: /${{ github.event.repository.name }}/
 
   screenshot:
+    if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     needs: build
     permissions:
