@@ -157,10 +157,20 @@ jobs:
       - name: Generate and commit screenshot if changed
         env:
           BASE_URL: /${{ github.event.repository.name }}/
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
         run: |
           pnpm run preview -- --port 4173 --strictPort &
           sleep 8
           pnpm run generate:screenshot
+
+          # Commits made with GITHUB_TOKEN do not trigger new workflows.
+          # Restrict auto-commits to direct pushes on main so PR heads keep check runs.
+          if [[ "$GITHUB_EVENT_NAME" != "push" || "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Skipping screenshot auto-commit for event=$GITHUB_EVENT_NAME ref=$GITHUB_REF"
+            exit 0
+          fi
+
           if ! git diff --exit-code assets/screenshot.png; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
