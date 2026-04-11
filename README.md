@@ -140,6 +140,14 @@ The site will be available at `https://yourusername.github.io/progression` (repl
 
 Dependabot is configured to automatically create PRs for dependency updates. PRs that pass CI will be automatically merged.
 
+### Automatic Screenshot Updates
+
+Screenshot updates are automated via GitHub Actions:
+
+- On each push to `main`, CI regenerates `assets/screenshot.png`
+- If the image changed, a PR is created automatically
+- Auto-merge is enabled for that PR, so it merges once required checks pass
+
 ### Branch Protection CLI
 
 Apply branch protection and required checks for `main` with GitHub CLI:
