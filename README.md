@@ -140,6 +140,22 @@ The site will be available at `https://yourusername.github.io/progression` (repl
 
 Dependabot is configured to automatically create PRs for dependency updates. PRs that pass CI will be automatically merged.
 
+### Branch Protection CLI
+
+Apply branch protection and required checks for `main` with GitHub CLI:
+
+```bash
+pnpm run setup:branch-protection
+```
+
+You can also target a specific repository and branch:
+
+```bash
+bash scripts/apply-branch-protection.sh owner/repo main
+```
+
+This enables repository auto-merge and applies a branch ruleset requiring `build`, `lint-test`, and `lighthouse` checks before merge.
+
 ## Testing
 
 Unit tests are written using Vitest and cover:
