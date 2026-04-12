@@ -16,6 +16,8 @@ jobs:
   screenshot-update:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' }}
+    env:
+      PREVIEW_PORT: "4174"
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -41,9 +43,9 @@ jobs:
         env:
           BASE_URL: /${{ github.event.repository.name }}/
         run: |
-          pnpm run preview -- --port 4174 --strictPort &
+          pnpm run preview -- --port "$PREVIEW_PORT" --strictPort &
           sleep 8
-          PREVIEW_PORT=4174 pnpm run generate:screenshot
+          pnpm run generate:screenshot
 
       - name: Create screenshot update PR
         id: cpr
