@@ -58,7 +58,9 @@ jobs:
           # Avoid pre-push (build + lighthouse preview on 4173) while port is still in use.
           HUSKY: "0"
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN pushes do not start other workflows (recursive-run guard). Use a PAT
+          # so CI runs on the screenshot PR; see https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs
+          token: ${{ secrets.SCREENSHOT_PR_PAT || github.token }}
           commit-message: "chore(assets): update screenshot"
           title: "chore(assets): update screenshot"
           body: |
@@ -71,5 +73,5 @@ jobs:
       - name: Enable auto-merge for screenshot PR
         if: ${{ steps.cpr.outputs.pull-request-number != '' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SCREENSHOT_PR_PAT || github.token }}
         run: gh pr merge --auto --merge "${{ steps.cpr.outputs.pull-request-number }}" --repo "${{ github.repository }}"
