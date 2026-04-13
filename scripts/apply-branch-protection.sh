@@ -40,7 +40,7 @@ gh api --method POST "repos/${REPO}/rulesets" --input - <<JSON
     {
       "type": "required_status_checks",
       "parameters": {
-        "strict_required_status_checks_policy": true,
+        "strict_required_status_checks_policy": false,
         "required_status_checks": [
           { "context": "build" },
           { "context": "lint-test" },
@@ -53,4 +53,6 @@ gh api --method POST "repos/${REPO}/rulesets" --input - <<JSON
 JSON
 
 echo "Done. '${BRANCH}' now requires: build, lint-test, lighthouse."
-echo "Dependabot PRs can auto-merge only after these checks pass."
+echo "Strict 'up to date with base' is off so auto-merge can complete without manual"
+echo "'Update branch' when main moves (re-run this script after changing the ruleset)."
+echo "Dependabot PRs can auto-merge only after these checks pass on the PR head."
