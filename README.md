@@ -163,7 +163,9 @@ You can also target a specific repository and branch:
 bash scripts/apply-branch-protection.sh owner/repo main
 ```
 
-This enables repository auto-merge and applies a branch ruleset requiring `build`, `lint-test`, and `lighthouse` checks before merge.
+This enables repository auto-merge and applies a branch ruleset requiring `build`, `lint-test`, and `lighthouse` checks on the PR before merge. **Strict “branch is up to date with `main`” is not required**, so auto-merge can finish even when `main` has moved since the PR was opened (otherwise GitHub queues auto-merge until someone clicks **Update branch**, which often leaves long-lived PRs stuck).
+
+After changing the script, run `pnpm run setup:branch-protection` again so the ruleset on GitHub matches.
 
 ## Testing
 
