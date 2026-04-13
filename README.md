@@ -138,14 +138,14 @@ The site will be available at `https://yourusername.github.io/progression` (repl
 
 ### Dependabot
 
-Dependabot is configured to automatically create PRs for dependency updates. PRs that pass CI will be automatically merged.
+Dependabot is configured to automatically create PRs for dependency updates. PRs that pass CI are queued for auto-merge using a merge commit (not squash).
 
 ### Automatic Screenshot Updates
 
 Screenshot updates are automated via the **Screenshot Auto Update** workflow (`.github/workflows/screenshot-auto-update.yml`):
 
 - On each push to `main` (and on a daily schedule), CI builds the site, starts preview, regenerates `assets/screenshot.png`, and opens a PR when the image changed
-- Auto-merge is enabled for that PR when checks pass
+- Auto-merge is enabled for that PR when checks pass (merge commit, not squash)
 
 Repository administrators must allow the default `GITHUB_TOKEN` to open pull requests: **Settings → Actions → General → Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests** (see [Setting the permissions of the GITHUB_TOKEN](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-and-disabling-github-actions/managing-github-actions-settings-for-a-repository#setting-the-permissions-of-the-github_token-for-your-repository)). Without this, the workflow can push a branch but fails when creating the PR.
 
