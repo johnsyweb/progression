@@ -45,12 +45,18 @@ jobs:
           BASE_URL: /${{ github.event.repository.name }}/
         run: |
           pnpm exec vite preview --port "$PREVIEW_PORT" --strictPort --host localhost &
+          preview_pid=$!
           sleep 8
           pnpm run generate:screenshot
+          kill "$preview_pid" 2>/dev/null || true
+          wait "$preview_pid" 2>/dev/null || true
 
       - name: Create screenshot update PR
         id: cpr
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        env:
+          # Avoid pre-push (build + lighthouse preview on 4173) while port is still in use.
+          HUSKY: "0"
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(assets): update screenshot"
