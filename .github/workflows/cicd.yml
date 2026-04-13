@@ -159,8 +159,11 @@ jobs:
           BASE_URL: /${{ github.event.repository.name }}/
         run: |
           pnpm exec vite preview --port 4173 --strictPort --host localhost &
+          preview_pid=$!
           sleep 8
           pnpm run generate:screenshot
+          kill "$preview_pid" 2>/dev/null || true
+          wait "$preview_pid" 2>/dev/null || true
 
           if ! git diff --exit-code assets/screenshot.png; then
             echo "::warning::README screenshot changed. Run 'pnpm run generate:screenshot' locally and commit assets/screenshot.png."

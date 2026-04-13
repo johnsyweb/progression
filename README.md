@@ -118,7 +118,7 @@ The CI workflow runs on:
 - Pull requests
 - Pushes to any branch
 
-It runs tests, linting, type checking, and builds the project. If the generated screenshot differs from `assets/screenshot.png`, CI commits and pushes the new screenshot automatically.
+It runs tests, linting, type checking, and builds the project. If the generated screenshot differs from `assets/screenshot.png`, the screenshot job emits a workflow warning so you can regenerate and commit locally (or merge the automated screenshot PR from the **Screenshot Auto Update** workflow).
 
 ### Deploy Workflow
 
@@ -142,11 +142,12 @@ Dependabot is configured to automatically create PRs for dependency updates. PRs
 
 ### Automatic Screenshot Updates
 
-Screenshot updates are automated via GitHub Actions:
+Screenshot updates are automated via the **Screenshot Auto Update** workflow (`.github/workflows/screenshot-auto-update.yml`):
 
-- On each push to `main`, CI regenerates `assets/screenshot.png`
-- If the image changed, a PR is created automatically
-- Auto-merge is enabled for that PR, so it merges once required checks pass
+- On each push to `main` (and on a daily schedule), CI builds the site, starts preview, regenerates `assets/screenshot.png`, and opens a PR when the image changed
+- Auto-merge is enabled for that PR when checks pass
+
+Repository administrators must allow the default `GITHUB_TOKEN` to open pull requests: **Settings → Actions → General → Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests** (see [GitHub Actions permissions](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-and-disabling-github-actions/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)). Without this, the workflow can push a branch but fails when creating the PR.
 
 ### Branch Protection CLI
 
