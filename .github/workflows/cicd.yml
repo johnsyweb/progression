@@ -158,7 +158,7 @@ jobs:
         env:
           BASE_URL: /${{ github.event.repository.name }}/
         run: |
-          pnpm run preview -- --port 4173 --strictPort &
+          pnpm exec vite preview --port 4173 --strictPort --host localhost &
           sleep 8
           pnpm run generate:screenshot
 
