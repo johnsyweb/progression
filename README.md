@@ -147,7 +147,7 @@ Screenshot updates are automated via the **Screenshot Auto Update** workflow (`.
 - On each push to `main` (and on a daily schedule), CI builds the site, starts preview, regenerates `assets/screenshot.png`, and opens a PR when the image changed
 - Auto-merge is enabled for that PR when checks pass
 
-Repository administrators must allow the default `GITHUB_TOKEN` to open pull requests: **Settings → Actions → General → Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests** (see [GitHub Actions permissions](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-and-disabling-github-actions/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)). Without this, the workflow can push a branch but fails when creating the PR.
+Repository administrators must allow the default `GITHUB_TOKEN` to open pull requests: **Settings → Actions → General → Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests** (see [Setting the permissions of the GITHUB_TOKEN](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-and-disabling-github-actions/managing-github-actions-settings-for-a-repository#setting-the-permissions-of-the-github_token-for-your-repository)). Without this, the workflow can push a branch but fails when creating the PR.
 
 ### Branch Protection CLI
 
