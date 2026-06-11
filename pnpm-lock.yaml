@@ -16,10 +16,10 @@ importers:
         version: 25.9.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.60.1
-        version: 8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1)(typescript@6.0.3))(eslint@10.4.1)(typescript@6.0.3)
+        version: 8.60.1(@typescript-eslint/parser@8.61.0(eslint@10.4.1)(typescript@6.0.3))(eslint@10.4.1)(typescript@6.0.3)
       '@typescript-eslint/parser':
-        specifier: ^8.60.1
-        version: 8.60.1(eslint@10.4.1)(typescript@6.0.3)
+        specifier: ^8.61.0
+        version: 8.61.0(eslint@10.4.1)(typescript@6.0.3)
       '@vitest/coverage-v8':
         specifier: ^4.1.4
         version: 4.1.4(vitest@4.1.4)
@@ -792,13 +792,6 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       '@typescript-eslint/parser': ^8.61.0
-      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
-
-  '@typescript-eslint/parser@8.60.1':
-    resolution: {integrity: sha512-A0M6ua6H252bVjPvvtSgl2QA4+ET9S5Mtkb2GDyTxIhH/C4qDItT7RQNO5PhMC6NXGYXOR9dIalcDDgBKT7oFA==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
       typescript: '>=4.8.4 <6.1.0'
 
@@ -1784,11 +1777,6 @@ packages:
 
   semver@7.7.4:
     resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
-  semver@7.8.2:
-    resolution: {integrity: sha512-c8jsqUZm3omBOI66G90z1Dyw5z622G8oLG+omfsHBJf3CWQTlOcwOjvOG6wtiNfW6anKm/eA39LMwMtMez2TiQ==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -2859,10 +2847,10 @@ snapshots:
       '@types/node': 25.9.1
     optional: true
 
-  '@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.60.1(eslint@10.4.1)(typescript@6.0.3))(eslint@10.4.1)(typescript@6.0.3)':
+  '@typescript-eslint/eslint-plugin@8.60.1(@typescript-eslint/parser@8.61.0(eslint@10.4.1)(typescript@6.0.3))(eslint@10.4.1)(typescript@6.0.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.60.1(eslint@10.4.1)(typescript@6.0.3)
+      '@typescript-eslint/parser': 8.61.0(eslint@10.4.1)(typescript@6.0.3)
       '@typescript-eslint/scope-manager': 8.60.1
       '@typescript-eslint/type-utils': 8.60.1(eslint@10.4.1)(typescript@6.0.3)
       '@typescript-eslint/utils': 8.60.1(eslint@10.4.1)(typescript@6.0.3)
@@ -2891,18 +2879,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.60.1(eslint@10.4.1)(typescript@6.0.3)':
-    dependencies:
-      '@typescript-eslint/scope-manager': 8.60.1
-      '@typescript-eslint/types': 8.60.1
-      '@typescript-eslint/typescript-estree': 8.60.1(typescript@6.0.3)
-      '@typescript-eslint/visitor-keys': 8.60.1
-      debug: 4.4.3
-      eslint: 10.4.1
-      typescript: 6.0.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/parser@8.61.0(eslint@10.4.1)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.61.0
@@ -2917,8 +2893,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.60.1(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.60.1(typescript@6.0.3)
-      '@typescript-eslint/types': 8.60.1
+      '@typescript-eslint/tsconfig-utils': 8.61.0(typescript@6.0.3)
+      '@typescript-eslint/types': 8.61.0
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -2987,7 +2963,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.60.1
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.2
+      semver: 7.8.4
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -3982,8 +3958,6 @@ snapshots:
       xmlchars: 2.2.0
 
   semver@7.7.4: {}
-
-  semver@7.8.2: {}
 
   semver@7.8.4: {}
 
