@@ -3,6 +3,24 @@ export interface DateRange {
   end: Date;
 }
 
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+function isDateOnlyString(value: string): boolean {
+  return DATE_ONLY_PATTERN.test(value);
+}
+
+function toLocalEndOfDay(date: Date): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+}
+
 export function getBasePath(): string {
   // Get base path from <base> tag or default to "/"
   // In Node.js/test environment, document might not exist
@@ -52,10 +70,15 @@ export function parseDateFromPath(path: string): DateRange | null {
     return null;
   }
 
-  const start = date1 < date2 ? date1 : date2;
-  const end = date1 < date2 ? date2 : date1;
+  const firstDateIsEarlier = date1 < date2;
+  const start = firstDateIsEarlier ? date1 : date2;
+  const end = firstDateIsEarlier ? date2 : date1;
+  const endInput = firstDateIsEarlier ? date2Str : date1Str;
 
-  return { start, end };
+  return {
+    start,
+    end: isDateOnlyString(endInput) ? toLocalEndOfDay(end) : end,
+  };
 }
 
 export function parseTitleFromPath(path: string): string {
@@ -71,6 +94,13 @@ export function parseTitleFromPath(path: string): string {
 }
 
 export function parseDate(dateStr: string): Date | null {
+  if (isDateOnlyString(dateStr)) {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return isNaN(date.getTime()) ? null : date;
+  }
+
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) {
     return null;

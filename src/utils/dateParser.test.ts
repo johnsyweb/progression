@@ -16,6 +16,7 @@ describe("parseDate", () => {
     expect(date?.getFullYear()).toBe(2024);
     expect(date?.getMonth()).toBe(0);
     expect(date?.getDate()).toBe(1);
+    expect(date?.getHours()).toBe(0);
   });
 
   it("should return null for invalid date string", () => {
@@ -37,6 +38,16 @@ describe("parseDateFromPath", () => {
     expect(result?.start.getMonth()).toBe(0);
     expect(result?.end.getFullYear()).toBe(2024);
     expect(result?.end.getMonth()).toBe(11);
+  });
+
+  it("should treat a date-only end date as the end of that day", () => {
+    const result = parseDateFromPath("/2025-07-01/2026-06-30");
+
+    expect(result).not.toBeNull();
+    expect(result?.end.getHours()).toBe(23);
+    expect(result?.end.getMinutes()).toBe(59);
+    expect(result?.end.getSeconds()).toBe(59);
+    expect(result?.end.getMilliseconds()).toBe(999);
   });
 
   it("should order dates correctly (earlier first)", () => {

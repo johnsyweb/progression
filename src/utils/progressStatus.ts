@@ -3,6 +3,14 @@ export function calculateDaysBetween(start: Date, end: Date): number {
   return Math.round((end.getTime() - start.getTime()) / msPerDay);
 }
 
+function isSameCalendarDay(left: Date, right: Date): boolean {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
+}
+
 export function generateStatusText(data: {
   percentage: number | null;
   start: Date;
@@ -11,8 +19,15 @@ export function generateStatusText(data: {
 }): string {
   if (data.percentage !== null) {
     const totalDays = calculateDaysBetween(data.start, data.end);
-    const elapsedDays = calculateDaysBetween(data.start, data.current);
+    const elapsedDays = isSameCalendarDay(data.current, data.end)
+      ? totalDays
+      : calculateDaysBetween(data.start, data.current);
     const remainingDays = totalDays - elapsedDays;
+
+    if (isSameCalendarDay(data.current, data.end)) {
+      return `Today is the day • ${elapsedDays} days elapsed • ${remainingDays} days remaining`;
+    }
+
     return `${data.percentage.toFixed(1)}% complete • ${elapsedDays} days elapsed • ${remainingDays} days remaining`;
   } else {
     if (data.current < data.start) {

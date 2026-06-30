@@ -57,6 +57,15 @@ describe("getProgressBarData", () => {
     const result = getProgressBarData("/2024-01-01/2024-12-31");
     expect(result?.percentage).toBeNull();
   });
+
+  it("should return a full percentage on the final day of the range", () => {
+    vi.setSystemTime(new Date(2026, 5, 30, 12, 0, 0));
+    const result = getProgressBarData(
+      "/2025-07-01/2026-06-30/Pete's%20Career%20Break"
+    );
+
+    expect(result?.percentage).toBe(100);
+  });
 });
 
 describe("renderProgressBar", () => {
@@ -97,6 +106,20 @@ describe("renderProgressBar", () => {
     expect(html).not.toContain("progress-indicator");
     expect(html).not.toContain("progress-percentage");
     expect(html).toContain("progress-dates");
+  });
+
+  it("should render the final-day message with a full bar", () => {
+    const data = {
+      start: new Date(2025, 6, 1),
+      end: new Date(2026, 5, 30, 23, 59, 59, 999),
+      current: new Date(2026, 5, 30, 12, 0, 0),
+      percentage: 100,
+      title: "Pete's Career Break",
+    };
+
+    const html = renderProgressBar(data);
+    expect(html).toContain("Today is the day");
+    expect(html).toContain("width: 100%");
   });
 
   it("should format dates correctly", () => {

@@ -46,6 +46,20 @@ describe("generateStatusText", () => {
     expect(status).toContain("days remaining");
   });
 
+  it("should generate special status text on the final day", () => {
+    const data = {
+      percentage: 100,
+      start: new Date(2025, 6, 1),
+      end: new Date(2026, 5, 30, 23, 59, 59, 999),
+      current: new Date(2026, 5, 30, 12, 0, 0),
+    };
+
+    const status = generateStatusText(data);
+    expect(status).toBe(
+      "Today is the day • 365 days elapsed • 0 days remaining"
+    );
+  });
+
   it("should generate status text for future start", () => {
     const data = {
       percentage: null,
