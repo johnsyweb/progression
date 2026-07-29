@@ -118,7 +118,7 @@ The CI workflow runs on:
 - Pull requests
 - Pushes to any branch
 
-It runs tests, linting, type checking, and builds the project. If the generated screenshot differs from `assets/screenshot.png`, the screenshot job emits a workflow warning so you can regenerate and commit locally (or merge the automated screenshot PR from the **Screenshot Auto Update** workflow).
+It runs tests, linting, type checking, and builds the project. If the generated screenshot differs from `assets/screenshot.png`, the screenshot job emits a workflow warning so you can regenerate and commit locally.
 
 ### Deploy Workflow
 
@@ -139,17 +139,6 @@ The site will be available at `https://yourusername.github.io/progression` (repl
 ### Dependabot
 
 Dependabot is configured to automatically create PRs for dependency updates. PRs that pass CI are queued for auto-merge using a merge commit (not squash).
-
-### Automatic Screenshot Updates
-
-Screenshot updates are automated via the **Screenshot Auto Update** workflow (`.github/workflows/screenshot-auto-update.yml`):
-
-- On each push to `main` (and on a daily schedule), CI builds the site, starts preview, regenerates `assets/screenshot.png`, and opens a PR when the image changed
-- Auto-merge is enabled for that PR when checks pass (merge commit, not squash)
-
-Repository administrators must allow GitHub Actions to open pull requests: **Settings → Actions → General → Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests** (see [Setting the permissions of the GITHUB_TOKEN](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-and-disabling-github-actions/managing-github-actions-settings-for-a-repository#setting-the-permissions-of-the-github_token-for-your-repository)).
-
-**CI on the screenshot PR:** Pushes made with the default `GITHUB_TOKEN` do **not** start new workflow runs (GitHub blocks recursive runs; see [when `GITHUB_TOKEN` triggers workflow runs](https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs)). So automated screenshot PRs will not show **CI/CD** checks from those pushes until you add a repository secret **`SCREENSHOT_PR_PAT`**: a fine-grained or classic personal access token with **Contents** (read/write) and **Pull requests** (read/write) for this repository. The screenshot workflow uses `secrets.SCREENSHOT_PR_PAT || github.token`, so without the secret it still runs, but the resulting PR will not get a new CI run from that push.
 
 ### Branch Protection CLI
 
