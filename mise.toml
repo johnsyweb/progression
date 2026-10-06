@@ -1,0 +1,39 @@
+[tasks.bootstrap]
+description = "Install mise tools and a frozen dependency tree (aube ci)"
+file = "script/bootstrap"
+
+[tasks.ci-install]
+description = "Frozen dependency install for CI"
+file = "script/ci-install"
+
+[tasks.update]
+description = "Refresh tools and dependencies after git pull"
+file = "script/update"
+
+[tasks.update-deps]
+description = "Show outdated packages and bump within package.json ranges (aube update)"
+file = "script/update-deps"
+
+[tasks.lint]
+description = "Run ESLint"
+file = "script/lint"
+
+[tasks.typecheck]
+description = "Run TypeScript type check"
+file = "script/typecheck"
+
+[tasks.test]
+description = "Run unit tests once"
+file = "script/test"
+
+[tasks.build]
+description = "Production build to dist/"
+file = "script/build"
+
+[tasks.audit]
+description = "Audit dependencies (moderate severity and above)"
+file = "script/audit"
+
+[tasks.cibuild]
+description = "Run local CI checks sequentially (ci-install, lint, typecheck, test, audit, build)"
+file = "script/cibuild"

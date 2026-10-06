@@ -41,44 +41,53 @@ The site supports both light and dark modes, automatically adapting to your syst
 
 ## Development
 
+This repo uses [mise](https://mise.jdx.dev/) for tools and [aube](https://aube.jdx.dev/) for packages (paranoid mode; see `docs/adr/`).
+
 ```bash
-# Install dependencies
-pnpm install
+# Install tools and a frozen dependency tree
+mise run bootstrap
+
+# Or after git pull
+mise run update
+
+# Within-range dependency bumps
+mise run update-deps
 
 # Build
-pnpm run build
+aube run build
+# or: mise run build
 
 # Run tests (watch mode)
-pnpm test
+aube test
 
 # Run tests once
-pnpm run test:run
+aube run test:run
 
 # Start development server
-pnpm dev
+aube run dev
 
 # Format code
-pnpm run format
+aube run format
 
 # Lint code
-pnpm run lint
+aube run lint
 
 # Type check
-pnpm run typecheck
+aube run typecheck
 
-# Run all checks (format, lint, typecheck, test)
-pnpm run precommit
+# Local CI gate (install, lint, typecheck, test, audit, build)
+mise run cibuild
 
 # Run Lighthouse (performance, accessibility, best-practices, SEO)
 # Build first, then run. Set BASE_URL to match your deploy path if needed.
-pnpm run build && pnpm run lighthouse
+aube run build && aube run lighthouse
 
 # Regenerate README/OG screenshot (preview server must be running)
-pnpm run build && pnpm run preview &
-sleep 5 && pnpm run generate:screenshot
+aube run build && aube run preview &
+sleep 5 && aube run generate:screenshot
 
 # Regenerate PWA/app icons (PNG from assets/icon.svg)
-pnpm run generate:icons
+aube run generate:icons
 ```
 
 ## Project Structure
@@ -101,10 +110,10 @@ The project compiles TypeScript to JavaScript in the `dist/` directory. The HTML
 
 ```bash
 # Build for production
-pnpm run build
+aube run build
 
 # Preview production build
-pnpm run preview
+aube run preview
 ```
 
 ## Deployment
@@ -145,7 +154,7 @@ Dependabot is configured to automatically create PRs for dependency updates. PRs
 Apply branch protection and required checks for `main` with GitHub CLI:
 
 ```bash
-pnpm run setup:branch-protection
+aube run setup:branch-protection
 ```
 
 You can also target a specific repository and branch:
@@ -156,7 +165,7 @@ bash scripts/apply-branch-protection.sh owner/repo main
 
 This enables repository auto-merge and applies a branch ruleset requiring `build`, `lint-test`, and `lighthouse` checks on the PR before merge. **Strict “branch is up to date with `main`” is not required**, so auto-merge can finish even when `main` has moved since the PR was opened (otherwise GitHub queues auto-merge until someone clicks **Update branch**, which often leaves long-lived PRs stuck).
 
-After changing the script, run `pnpm run setup:branch-protection` again so the ruleset on GitHub matches.
+After changing the script, run `aube run setup:branch-protection` again so the ruleset on GitHub matches.
 
 ## Testing
 
@@ -169,7 +178,7 @@ Unit tests are written using Vitest and cover:
 - Default behavior when no dates provided
 - Share functionality (including PNG capture via html2canvas)
 
-Run tests with `pnpm run test:run` (single run) or `pnpm test` (watch mode).
+Run tests with `aube run test:run` (single run) or `aube test` (watch mode).
 
 ## SEO and Metadata
 
@@ -188,5 +197,5 @@ The structured data matches the schema used on www.johnsy.com for consistency.
 
 When the site is saved to a device home screen (e.g. iPhone “Add to Home Screen”), the same icon and metadata as the website are used:
 
-- **Icon**: The clock favicon is provided as `assets/icon.svg` (browser tab) and as PNGs for home screen use: `apple-touch-icon` (180×180) and `manifest.webmanifest` icons (192×192, 512×512). PNGs are generated from the SVG via `pnpm run generate:icons`.
+- **Icon**: The clock favicon is provided as `assets/icon.svg` (browser tab) and as PNGs for home screen use: `apple-touch-icon` (180×180) and `manifest.webmanifest` icons (192×192, 512×512). PNGs are generated from the SVG via `aube run generate:icons`.
 - **Metadata**: The web app manifest (`manifest.webmanifest`, emitted at build time) sets the app name (“Progress”), description, theme colour, and icons so that the saved app matches the site branding.

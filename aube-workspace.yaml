@@ -1,0 +1,15 @@
+paranoid: true
+packageManagerStrictVersion: true
+# 7 days — aligned with Renovate minimumReleaseAge in johnsyweb/renovate-config
+minimumReleaseAge: 10080
+# Lifecycle scripts stay fail-closed. esbuild was previously in pnpm
+# ignoredBuiltDependencies; do not add it here without review.
+allowBuilds: {}
+overrides:
+  source-map-js: ">=1.2.2"
+  # Stay on undici 7.x — jsdom 29 imports wrap-handler.js removed in undici 8.
+  undici: ">=7.29.1 <8"
+# Security bumps younger than the cooling window (remove once aged in).
+minimumReleaseAgeExclude:
+  - source-map-js
+  - undici

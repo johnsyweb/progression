@@ -1,4 +1,2 @@
-nodejs latest
-pnpm latest
-
-
+nodejs 26.10.0
+aube 1.40.0
