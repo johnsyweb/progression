@@ -55,4 +55,4 @@ JSON
 echo "Done. '${BRANCH}' now requires: build, lint-test, lighthouse."
 echo "Strict 'up to date with base' is off so auto-merge can complete without manual"
 echo "'Update branch' when main moves (re-run this script after changing the ruleset)."
-echo "Dependabot PRs can auto-merge only after these checks pass on the PR head."
+echo "Renovate PRs can auto-merge only after these checks pass on the PR head."

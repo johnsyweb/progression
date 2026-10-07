@@ -1,201 +1,84 @@
 # Progress
 
-A microsite for www.johnsy.com that displays a progress bar based on two dates from the URL path.
+A temporal progress bar driven by two dates in the URL path.
 
-## Usage
+[![CI/CD](https://github.com/johnsyweb/progression/actions/workflows/cicd.yml/badge.svg)](https://github.com/johnsyweb/progression/actions/workflows/cicd.yml)
 
-The site takes two dates from the URL path, with an optional title:
+Shareable timelines for career breaks, years, or any date range — edit the title and dates in the page, then share a link (and optional PNG) that shows how far through you are. Live at [www.johnsy.com/progression](https://www.johnsy.com/progression/).
+
+## Getting started
+
+Open a range on the live site:
 
 ```
-/progression/2024-01-01/2024-12-31
-/progression/2024-01-01/2024-12-31/Pete's Career break
+https://www.johnsy.com/progression/2024-01-01/2024-12-31
+https://www.johnsy.com/progression/2024-01-01/2024-12-31/Pete's Career break
 ```
 
-- The left end of the progress bar represents the earlier of the two dates
-- The right end represents the later of the two dates
-- If today is within the range, it will be shown with the percentage complete
-- The percentage is clamped between 0% and 100%
-- An optional third parameter can be used as a custom title (defaults to "Progress")
-- If no valid dates are provided, the site automatically redirects to the current year (e.g., `/progression/2025-01-01/2025-12-31/2025`)
+- The left end is the earlier date; the right end is the later date
+- Within the range, the bar shows percentage complete (clamped 0–100%)
+- An optional third path segment is the title (default `"Progress"`)
+- With no valid dates, the site redirects to the current calendar year
 
-### Editing Features
+### Editing and sharing
 
-All elements of the progress bar can be edited directly:
+- **Title** — click or `Alt+T` / `Cmd+T`; Enter saves, Escape cancels
+- **Start / end** — click or `Alt+S` / `Cmd+S` and `Alt+E` / `Cmd+E` for date pickers
+- **Share** — `Alt+H` / `Cmd+H` uses the Web Share API when available, otherwise copies the link; share can include a PNG of the bar (excluding the Share control)
 
-- **Title** - Click the title or press `Alt+T` (or `Cmd+T` on Mac) to edit. Press `Enter` to save or `Escape` to cancel.
-- **Start Date** - Click the start date or press `Alt+S` (or `Cmd+S` on Mac) to open a date picker. The start date is constrained to dates in the past (up to today).
-- **End Date** - Click the end date or press `Alt+E` (or `Cmd+E` on Mac) to open a date picker. The end date is constrained to dates from today onwards.
-- **Share** - Press `Alt+H` (or `Cmd+H` on Mac) to share the progress bar. Uses the Web Share API if available, otherwise falls back to copying the link to clipboard.
-
-When dates are changed, the URL is automatically updated and the progress bar is recalculated. If the start date becomes after the end date (or vice versa), the other date is automatically adjusted to maintain a valid range.
-
-### Sharing
-
-The progress bar can be shared using the Web Share API (on supported platforms) or by copying the link to the clipboard. When sharing with the Web Share API, a PNG screenshot of the progress bar (excluding the Share button) is captured and included.
-
-### Appearance
-
-The site supports both light and dark modes, automatically adapting to your system preferences. The color palette matches www.johnsy.com's design system.
+Light and dark modes follow system preference; colours match www.johnsy.com.
 
 ![Screenshot of the progress bar interface](./assets/screenshot.png)
 
-## Development
+## Help
 
-This repo uses [mise](https://mise.jdx.dev/) for tools and [aube](https://aube.jdx.dev/) for packages (paranoid mode; see `docs/adr/`).
+[GitHub Issues](https://github.com/johnsyweb/progression/issues) — see [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md).
+
+## Maintainers
+
+Pete Johns ([johnsyweb](https://github.com/johnsyweb)).
+
+## Development status
+
+Maintained. Version `1.0.0` in `package.json`; deployed continuously to GitHub Pages.
+
+## Local development
+
+Uses [mise](https://mise.jdx.dev/) for tools and [aube](https://aube.jdx.dev/) for packages (paranoid mode; ADRs in [`docs/adr/`](docs/adr/)).
 
 ```bash
-# Install tools and a frozen dependency tree
-mise run bootstrap
-
-# Or after git pull
-mise run update
-
-# Within-range dependency bumps
-mise run update-deps
-
-# Build
-aube run build
-# or: mise run build
-
-# Run tests (watch mode)
-aube test
-
-# Run tests once
-aube run test:run
-
-# Start development server
-aube run dev
-
-# Format code
-aube run format
-
-# Lint code
-aube run lint
-
-# Type check
-aube run typecheck
-
-# Local CI gate (install, lint, typecheck, test, audit, build)
-mise run cibuild
-
-# Run Lighthouse (performance, accessibility, best-practices, SEO)
-# Build first, then run. Set BASE_URL to match your deploy path if needed.
+mise run bootstrap          # tools + frozen install
+mise run update             # after git pull
+mise run update-deps        # within-range bumps (aube outdated / update)
+aube run dev                # local server
+mise run cibuild            # install, lint, typecheck, test, audit, build
 aube run build && aube run lighthouse
-
-# Regenerate README/OG screenshot (preview server must be running)
 aube run build && aube run preview &
 sleep 5 && aube run generate:screenshot
-
-# Regenerate PWA/app icons (PNG from assets/icon.svg)
 aube run generate:icons
 ```
 
-## Project Structure
+Dependency updates are owned by [Mend Renovate](https://docs.renovatebot.com/) via [johnsyweb/renovate-config](https://github.com/johnsyweb/renovate-config) (seven-day cooling, automerge when CI is green; `aube-lock` regenerates `aube-lock.yaml` on Renovate branches). See [docs/adr/0002-renovate-for-dependency-updates.md](docs/adr/0002-renovate-for-dependency-updates.md).
 
-- `src/main.ts` - Entry point, initialises the progress bar and handles URL redirects
-- `src/progressBar.ts` - Progress bar logic and rendering
-- `src/utils/dateParser.ts` - Date parsing and progress calculation utilities
-- `src/utils/progressStatus.ts` - Status text and date calculations for the progress bar
-- `src/server/htmlTransform.ts` - Vite plugin for HTML transformation during development
-- `src/server/buildPlugin.ts` - Vite plugin for build-time optimisations
-- `src/index.html` - HTML template
-- `src/style.css` - Styles matching www.johnsy.com (supports light and dark modes)
-- `src/utils/share.ts` - Share functionality: captures progress bar as PNG (excluding Share button) and uses Web Share API or clipboard fallback
-- `src/utils/generateSitemap.ts` - Sitemap generation utility
-- `src/utils/escapeXml.ts` - XML/HTML escaping utility
+Tests use Vitest (`aube run test:run` or `aube test`). Layout under `src/` is the Vite app entry, progress bar, date/status helpers, and build plugins.
 
-## Building
+## Contributing
 
-The project compiles TypeScript to JavaScript in the `dist/` directory. The HTML and CSS files are copied to `dist/` during the build process.
-
-```bash
-# Build for production
-aube run build
-
-# Preview production build
-aube run preview
-```
-
-## Deployment
-
-The project is configured to deploy to GitHub Pages automatically via GitHub Actions.
-
-### CI Workflow
-
-The CI workflow runs on:
-
-- Pull requests
-- Pushes to any branch
-
-It runs tests, linting, type checking, and builds the project. If the generated screenshot differs from `assets/screenshot.png`, the screenshot job emits a workflow warning so you can regenerate and commit locally.
-
-### Deploy Workflow
-
-The deploy workflow:
-
-- Runs automatically when CI completes successfully on the `main` branch
-- Can be manually triggered via GitHub Actions UI
-- Deploys to GitHub Pages only after all checks pass
-
-### Setting up GitHub Pages
-
-1. Go to your repository Settings → Pages
-2. Under "Source", select "GitHub Actions"
-3. Push to the `main` branch to trigger CI, which will then trigger deployment
-
-The site will be available at `https://yourusername.github.io/progression` (replace `yourusername` and `progression` with your actual GitHub username and repository name).
-
-### Dependabot
-
-Dependabot is configured to automatically create PRs for dependency updates. PRs that pass CI are queued for auto-merge using a merge commit (not squash).
-
-### Branch Protection CLI
-
-Apply branch protection and required checks for `main` with GitHub CLI:
+Issues and PRs against this repository. Pre-commit / pre-push hooks (Husky) run format, lint, typecheck, build, tests, and Lighthouse. Required checks on `main` are applied with:
 
 ```bash
 aube run setup:branch-protection
+# or: bash scripts/apply-branch-protection.sh owner/repo main
 ```
 
-You can also target a specific repository and branch:
+That enables repository auto-merge and a ruleset requiring `build`, `lint-test`, and `lighthouse`. Strict “branch up to date with `main`” is off so auto-merge is not stuck waiting for Update branch. Re-run the script after changing it.
 
-```bash
-bash scripts/apply-branch-protection.sh owner/repo main
-```
+## Releasing
 
-This enables repository auto-merge and applies a branch ruleset requiring `build`, `lint-test`, and `lighthouse` checks on the PR before merge. **Strict “branch is up to date with `main`” is not required**, so auto-merge can finish even when `main` has moved since the PR was opened (otherwise GitHub queues auto-merge until someone clicks **Update branch**, which often leaves long-lived PRs stuck).
+Merges to `main` run [CI/CD](.github/workflows/cicd.yml): lint, test, Lighthouse, then deploy to GitHub Pages. Repository Settings → Pages → Source must be **GitHub Actions**. Site: `https://www.johnsy.com/progression/` (or `https://<user>.github.io/progression` for a fork).
 
-After changing the script, run `aube run setup:branch-protection` again so the ruleset on GitHub matches.
+If CI reports screenshot drift, regenerate with `aube run generate:screenshot` and commit `assets/screenshot.png`. The scheduled screenshot auto-update workflow is disabled; it can still be run manually via Actions.
 
-## Testing
+## SEO and home screen
 
-Unit tests are written using Vitest and cover:
-
-- Date parsing from URL paths (including base path handling)
-- Title parsing from URL paths
-- Progress calculation
-- Edge cases (dates outside range, invalid dates, etc.)
-- Default behavior when no dates provided
-- Share functionality (including PNG capture via html2canvas)
-
-Run tests with `aube run test:run` (single run) or `aube test` (watch mode).
-
-## SEO and Metadata
-
-The site includes comprehensive SEO features:
-
-- Open Graph meta tags for social sharing
-- JSON-LD structured data (WebPage and Person schemas)
-- Dynamic meta descriptions based on progress status
-- Canonical URLs
-- Sitemap.xml generation at build time
-- Generic screenshot for Open Graph and Twitter card images
-
-The structured data matches the schema used on www.johnsy.com for consistency.
-
-## Add to Home Screen (PWA)
-
-When the site is saved to a device home screen (e.g. iPhone “Add to Home Screen”), the same icon and metadata as the website are used:
-
-- **Icon**: The clock favicon is provided as `assets/icon.svg` (browser tab) and as PNGs for home screen use: `apple-touch-icon` (180×180) and `manifest.webmanifest` icons (192×192, 512×512). PNGs are generated from the SVG via `aube run generate:icons`.
-- **Metadata**: The web app manifest (`manifest.webmanifest`, emitted at build time) sets the app name (“Progress”), description, theme colour, and icons so that the saved app matches the site branding.
+Open Graph tags, JSON-LD, canonical URLs, and a build-time `sitemap.xml` support sharing. Home-screen icons come from `assets/icon.svg` (PNGs via `aube run generate:icons`) and `manifest.webmanifest` emitted at build time.
