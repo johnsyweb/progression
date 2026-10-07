@@ -1,11 +1,8 @@
 name: Screenshot Auto Update
 
+# Disabled for now — no scheduled or push-triggered screenshot PRs.
+# Re-enable by restoring `push` (main) and/or `schedule` under `on:`.
 on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
 
 permissions:
