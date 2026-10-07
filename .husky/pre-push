@@ -1,1 +1,1 @@
-mise exec -- sh -c 'pnpm run build && pnpm run lighthouse'
+mise exec -- sh -c 'aube run build && aube run lighthouse'

@@ -1,1 +1,1 @@
-mise exec -- sh -c 'pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test:run'
+mise exec -- sh -c 'aube run format:check && aube run lint && aube run typecheck && aube run build && aube run test:run'
