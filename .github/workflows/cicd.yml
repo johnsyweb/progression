@@ -33,7 +33,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache aube store
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/aube/store
           key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
@@ -47,7 +47,7 @@ jobs:
         run: ./script/build
 
       - name: Cache dist
-        uses: actions/cache/save@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: dist
           key: build-${{ hashFiles('**/aube-lock.yaml', 'src/**', 'vite.config.ts') }}
@@ -66,7 +66,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache aube store
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/aube/store
           key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
@@ -77,7 +77,7 @@ jobs:
         run: ./script/ci-install
 
       - name: Restore dist cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: dist-cache
         with:
           path: dist
@@ -116,7 +116,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache aube store
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/aube/store
           key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
@@ -127,7 +127,7 @@ jobs:
         run: ./script/ci-install
 
       - name: Restore dist cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: dist-cache
         with:
           path: dist
@@ -164,7 +164,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache aube store
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/aube/store
           key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
@@ -175,7 +175,7 @@ jobs:
         run: ./script/ci-install
 
       - name: Restore dist cache
-        uses: actions/cache/restore@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: dist-cache
         with:
           path: dist
@@ -220,7 +220,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache aube store
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/aube/store
           key: ${{ runner.os }}-aube-${{ hashFiles('aube-lock.yaml') }}
